@@ -1,5 +1,5 @@
-Diverse Approaches to Exact Pattern Matching
-============================================
+Exact Pattern Matching Analysis
+===============================
 
 ## Description
 
