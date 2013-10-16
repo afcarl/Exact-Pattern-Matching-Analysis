@@ -11,7 +11,7 @@
 using std::cout;
 using std::endl;
 
-const int kTestNum = 3;       // Number of tests to perform
+const int kTestNum = 3;   // Number of tests to perform
 typedef bool (*Test) ();  // pointer to a test function
 
 bool test1() {
