@@ -117,6 +117,7 @@ In the searching phase, the algorithm needs shift the pattern and sequentially m
 
 \subsection{complexity}
 
+\newpage
 \section{Aho-Corasick algorithm}
 Aho-Corasick algorithm \cite{aho} is a generalization of the Knuth-Morris-Pratt algorithm. It takes one or more patterns (a dictionary) to be searched in the text. Suppose, the total length of all patterns is k. Then, the algorithm pre-processes the patterns and constructs a Deterministic Finite Automaton (DFA) \cite{hopcroft} in O(k) time. The obtained DFA processes a text and reports pattern occurrences in linear time too -- O(n + z), where z is the number of occurrences to be found. The O(z) term is for that we assume that we can report all the occurrences in linear time. The example of the DFA is given in the figure \ref{dfa}.
 
@@ -150,9 +151,6 @@ We build a DFA of nodes and edges, where each unique character at position i of 
 
 \item If there are no more characters in the pattern, mark the node as dictionary node with the corresponding pattern, then select the next pattern in the list and make the pointer point to the first character in it. Set the current node to the root and repeat steps 2 through 5 until there are no more patterns in the list.
 \end{enumerate}
-
-
-
 
 \subsubsection{Setting Up the Reverse Edges}
 
@@ -189,9 +187,6 @@ A Deterministic Finite Automaton (DFA) is built according to the patterns as des
 
 The text is processed in a single pass. It is true that for a text of length n, minimum of n computations are required for comparing to DFA nodes. In addition, when a dictionary node was reached, this pattern would be inserted into array of found patterns. Thus the search runtime complexity is O(n+z) where z is occurrences of the matched patterns. 
 
-\newpage
-\section{Aho-Corasick Algorithm}
-...
 
 \newpage
 \section{Suffix-tree Pattern Matching}
