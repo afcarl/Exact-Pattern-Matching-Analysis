@@ -1,22 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Short Sectioned Assignment
-% LaTeX Template
-% Version 1.0 (5/5/12)
-%
-% This template has been downloaded from:
-% http://www.LaTeXTemplates.com
-%
-% Original author:
-% Frits Wenneker (http://www.howtotex.com)
-%
-% License:
-% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%----------------------------------------------------------------------------
-%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
-%----------------------------------------------------------------------------
 
 \documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
 
@@ -28,7 +9,7 @@
 \usepackage{graphicx} % Used for including graphics
 \usepackage{caption}
 \usepackage{subcaption}
-
+\usepackage{listings}
 \usepackage{sectsty} % Allows customizing section commands
 \allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
 
@@ -79,24 +60,43 @@
 
 
 \begin{document}
+
 \begin{titlepage}
 \maketitle
 \thispagestyle{empty}
 \clearpage
 \end{titlepage}
 
-%----------------------------------------------------------------------------
-%    INTRODUCTION
-%----------------------------------------------------------------------------
-
 \section{Introduction}
-Write introduction here...
+Pattern matching remains to this day an extensively studied problem. The exponential growth of computing and data collection has increased the need for a more efficient solution to this problem. Pattern matching is applied in a wide range of disciplines such as Database queries, Text editors, two dimensional mesh, Bioinformatics, music content retrieval, MS word spell checker, digital libraries, and search engines.\\
+
+One optimal algorithm that can be applied to all such applications which include different data formats has not been established. Therefore, we intend to test the performance of three different algorithms: Aho-Corasick, Suffix-tree, and Boyer-Moore algorithms. We will theoretically analyse and compare the time complexities of the above three algorithms. We will also apply them on texts, patterns, and alphabets of various types and lengths.\\
+
+Pattern matching can be defined as follows\cite{intro}: Given a text T of length n and a pattern P of length k over some alphabet $\Sigma$, where n > k, the exact pattern matching problem consists of finding all occurrences z of the pattern P in the text T.\\
+
+For example, let p = aba and t = abaababa over alphabet $\Sigma$ = \{a,b\}. As illustrated in Figure \ref{matching}, three occurrences of the considered pattern appear in the text, at locations 1, 4, and 6.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.6\textwidth]{figures/matching.png}
+\caption{pattern matching instance}
+\label{matching}
+\end{figure}
+
+A variety of algorithms have been developed for exact pattern matching, the most famous of which are presented in Figure \ref{algorithms}:
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.4\textwidth]{figures/algorithms.png}
+\caption{Algorithms for exact pattern matching}
+\label{algorithms}
+\end{figure}
+
+\newpage
 
 \section{Boyre-Moore Algorithm}
 Boyre Moore algorithm \cite{bm_fast} searches for all the occurrences of the pattern in the text. It is in some way similar to the naive search algorithm. Initially, it aligns the first character in P with the first character in T. The algorithm then compares characters between P and T sequentially from right to left. Once a mismatch occurs, a shift rule is applied thus moving the pattern by $s\ge 1$. The algorithm is basically divided into two stages: preprocessing and searching. There are two different preprocessing approaches in the literature: Bad Character Rule and Good Suffix Tree \cite{bm_tbc}. We decided to choose the Bad Character rule due to its simplicity and applicability to our dataset. In the following sections, we describe the two stages of the algorithm.
 
-\subsection{Preprocessing Stage}
-In the preprocessing stage, the algorithm makes use of the alphabet $\Sigma$ and the pattern P. A two dimensional table D is constructed by processing the pattern according to the available alphabet. D is of size $k\times|\Sigma|$ where for each mismatch index in P, the position of rightmost occurrence of a character in $\Sigma$ is stored. Figure \ref{fig:table} shows an example of the table stored by processing the pattern GCAGAGAG based on the DNA alphabet=\{A,C,G,T\}. Starting from the last row corresponding to a mismatch occurring at position i=k in P, i=8 for this example, the algorithm scans P to find the rightmost index of the given character. In the below example, the last occurrence of A before position 8 is 7, G is 6, C is 2, and T is 0. It is important to note here that if a character does not exist in the pattern, its position in the table is always 0. Now, the algorithm iterates from i=k to 1. If the mismatch occurs in position i-1, the algorithm updates only the value for the specific character placed in this position, A for this example, and all the other values remain the same as D[i,x]. The last occurrence of A before position 7 is 5, while G, C, and T stay the same.
 
 \begin{figure}[h!]
 \centering
@@ -105,7 +105,40 @@ In the preprocessing stage, the algorithm makes use of the alphabet $\Sigma$ and
 \label{fig:table}
 \end{figure}
 
+\subsection{Preprocessing Stage}
+In the preprocessing stage, the algorithm makes use of the alphabet $\Sigma$ and the pattern P. A two dimensional table D is constructed by processing the pattern according to the available alphabet. D is of size $k\times|\Sigma|$ where for each mismatch index in P, the position of rightmost occurrence of a character in $\Sigma$ is stored. Figure \ref{table} shows an example of the table stored by processing the pattern GCAGAGAG based on the DNA alphabet=\{A,C,G,T\}. Starting from the last row corresponding to a mismatch occurring at position i=k in P, i=8 for this example, the algorithm scans P to find the rightmost index of the given character. In the below example, the last occurrence of A before position 8 is 7, G is 6, C is 2, and T is 0. It is important to note here that if a character does not exist in the pattern, its position in the table is always 0. The algorithm iterates from i=k to 1. If the mismatch occurs in position i-1, the algorithm updates only the value for the specific character placed in this position, A for this example, and all the other values remain the same as D[i,x]. The last occurrence of A before position 7 is 5, while G, C, and T stay the same.
+
+
 \subsection{Searching Phase}
+
+In the searching phase, the algorithm shifts the pattern and sequentially matches it with the aligned text. Starting from the rightmost character in P, the algorithm checks the aligned character in T. If the pair of characters are matching, it sequentially continues the check to the next left character. If a mismatch occurs at position j in P, the algorithm shifts P according to the mismatched character x in the text. For example, if at position j, the text contains a character that is not found in P, the pattern is shifted by j. However, if the mismatched character is found in P, the pattern is shifted by j-i, where i corresponds to the rightmost occurrence of this character in P. The index i of the last occurrence is retrieved from table D (i=D[j,x] where x is the character in the text). Figure \ref{search} shows the searching phase for the example shown in the previous section. The pseudocode of Boyre Moore algorithm is shown below.\\
+\begin{lstlisting}
+Algoritm: BMMatch(T, P):
+Input: Text T (n characters) and pattern P (k characters)
+Output: List I of indexes of occurences of P in T
+
+D=Preprocess(P)
+l=k
+j=k
+z=0
+repeat
+    if P[j] = T[l] then
+        if j = 0 then
+            I[z]=l;
+	    z=z+1
+        else {check next character}
+            l = l - 1
+            j = j - 1
+    else { P[j] <> T[l] shift the pattern}
+        x=T[l]
+	i=D[j,x]
+	l = l + k - j - 1 {reset l to position of P in T}
+        l=l+ j - i
+        j =k
+until l > n
+return "There is no substring of T matching P."
+\end{lstlisting}
+
 In the searching phase, the algorithm needs shift the pattern and sequentially match it with the aligned text. Starting from the rightmost character in P, the algorithm checks the aligned character in T. If the pair of characters are matching, it sequentially continues the check to the next left character. If a mismatch occurs at position j in P, the algorithm needs to shift P according to the mismatched character in the text. For example, if at position j, the text contains a character that is not found in P, the pattern should be shifted by j. However, if the mismatched character is found in P, the pattern should be shifted by j-i, where i corresponds to the rightmost occurrence of this character in P. The index i of the last occurrence is retrieved from table D and i=D[j,x] where x is the character in the text. Figure \ref{fig:search} shows the searching phase for the example shown in the previous section.
 
 \begin{figure}[h!]
@@ -115,9 +148,12 @@ In the searching phase, the algorithm needs shift the pattern and sequentially m
 \label{fig:search}
 \end{figure}
 
-\subsection{complexity}
+
+\subsection{Complexity}
+In this section we show the time complexity for both the preprocessing and searching phases of the algorithm. For the preprocessing stage, a table of $k\times|\Sigma|$ is stored in memory, so the space complexity is O($k\times|\Sigma|$). Initially, the first row is initialized to zeros. At each step, one value is updated in the table and the rest of the values are copied from the row before it. So at each step i<k, $|\Sigma|$ operations are done. Thus, the preprocessing time complexity is O($k\times|\Sigma|$). For the searching phase, the text T is compared to pattern P from right to left. The worst time occurs when the shifts are only one character at a time and the algorithm would be similar to naive search with a complexity of O($k\times n$). However, the shifts employed by this algorithm allow it to have a sublinear complexity especially in the case of large alphabet and random strings.
 
 \newpage
+
 \section{Aho-Corasick algorithm}
 Aho-Corasick algorithm \cite{aho} is a generalization of the Knuth-Morris-Pratt algorithm. It takes one or more patterns (a dictionary) to be searched in the text. Suppose, the total length of all patterns is k. Then, the algorithm pre-processes the patterns and constructs a Deterministic Finite Automaton (DFA) \cite{hopcroft} in O(k) time. The obtained DFA processes a text and reports pattern occurrences in linear time too -- O(n + z), where z is the number of occurrences to be found. The O(z) term is for that we assume that we can report all the occurrences in linear time. The example of the DFA is given in the figure \ref{dfa}.
 
@@ -191,10 +227,15 @@ n = number of characters in input string\\
 z = pattern occurrences in the text\\
 
 \subsubsection{Preprocessing}
+<<<<<<< HEAD
 Preprocessing is done in two steps:
 A Deterministic Finite Automaton (DFA) is built according to the patterns as described in the previous section. Setting up nodes and creating forward edges requires k time.\\
 Traversing the DFA to add the reverse edges involves going forward k times and going up the reverse edges of a number of nodes. This number is bounded by the k, the total length of patterns since in the worst case a node at the end of each pattern will point back to the root. This gives a total of 2k for this step. \\
 Hence, the preprocessing yields a runtime of 3*k = O(k). 
+=======
+
+A Deterministic Finite Automaton (DFA) is built according to the patterns as described. Setting up nodes and creating forward edges requires k time, and traversing the DFA to add the reverse edges take a maximum of k time. This yields a runtime of 2*k = O(k).
+>>>>>>> b811412d288747a6cd25adfdf0c0e33b6aca9a54
 
 \subsubsection{Searching}
 Each character in the input text must be compared to the content of a node once, therefore a minimum of n computations is needed for comparisons, while outputting a pattern set of a dictionary node takes constant time. However, since pattern sets are output whenever they are found in the text, then the number of times the algorithm outputs a pattern, must be taken into consideration. The worst case is when patterns are found at virtually every position of the input string. For example, let the set of patterns be $\left\{a, a^2, ..., a^m\right\}$ where m is the length of the longest pattern, and let the text by $a^n$, such that $a^i$ is i a's.\\
@@ -209,9 +250,14 @@ This shows that in the worst case, the number of pattern occurrences in the text
 
 
 
+<<<<<<< HEAD
+=======
+The text is processed in a single pass. It is true that for a text of length n, minimum of n computations are required for comparing to DFA nodes. In addition, when a dictionary node was reached, this pattern would be inserted into array of found patterns. Thus the search runtime complexity is O(n+z) where z is occurrences of the matched patterns.
+>>>>>>> b811412d288747a6cd25adfdf0c0e33b6aca9a54
 
 
 \newpage
+
 \section{Suffix-tree Pattern Matching}
 As the third part of our comparative study, we propose a pattern matching algorithm that relies on so called suffix tree data structure. Suffix tree is a well known data structure which is commonly used in industrial and scientific applications of pattern matching today. Being a concise representation of a text composed over a finite alphabet, suffix tree, or more general suffix automaton, is a common way to compress large amounts of textual information, and it is widely used also in databases. In our study, we will perform tests of suffix tree base pattern matching algorithm, and compare it against the aforementioned Boyer-More and Aho-Corasick algorithms, trying to get an insight on when should one chose either of these algorithms.\\
 
@@ -236,7 +282,7 @@ $$
 
 
 \begin{enumerate}
-  \item 
+  \item
 \end{enumerate}
 
 
@@ -253,7 +299,7 @@ The suffix tree for the string $S$ of length $n$ is defined as a tree such that:
 
 \subsection{definitions of some notations}
 For a text, let $T = t_1t_2...t_3$ be a string over an alphabet $\Sigma$. And each string $T_i = t_it_{i+1}...t_n$ where $1 \leq i \leq n+1$ is a $suffix$ of string $T$. In particular, $T_{n+1} = \varepsilon$ is the $empty$ suffix. We define suffix tree $STree(T)$ of $T$ to be a data structure that represents $STre(T)$ in space linear in the length $|T|$ of $T$. And we denote it as $STree(T) =$
-$(Q^{'}$ 
+$(Q^{'}$
 $\cup$
 $\{\bot\},$
 $root, g^{'}, f^{'})$.Set $Q^{'}$ consists of all branching states (states from which there
@@ -262,6 +308,13 @@ The other states of $STrie(T)$ (the states other than $root$ and $\bot$ from whi
 there is exactly one transition) are called implicit states as states of $STree(T)$; they
 are not explicitly present in $STree(T)$. Here $\bot$ is an auxiliary state.
 
+\newpage
+
+\section{Dataset}
+We will apply these algorithms on an available dataset of DNA sequences and natural language text, to find specific sequence motifs in the first, and words and phrases in the latter. With regards to the biological dataset, we selected  the DNA sequence of  human chromosome 1 in fasta format as a searching test. The DNA alphabet consists of four elements, $\Sigma$ = \{A, C, G, T\}, that represent  the four nitrogenous bases. We also chose three different patterns for our experimental measurements. As for the natural language data set, we will search for specific phrases of varying lengths. We will compare the performance in the two data sets to highlight the effect of the size of the alphabet and pattern length.
+Applying the algorithms on these datasets will show practical results on the analytical complexities that we examined and the difference in performance of the three above mentioned algorithms on the tested domains of application.
+
+\newpage
 \bibliography{references}
 \nocite{*}
 
