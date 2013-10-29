@@ -129,9 +129,9 @@ Aho-Corasick algorithm \cite{aho} is a generalization of the Knuth-Morris-Pratt 
 \end{figure}
 
 \subsection{Construction of DFA}
-Let the index of the first character in a pattern be 1, and let i be an integer between 0 and the length of the longest pattern.
-\\
-We build a DFA of nodes and edges, where each unique character at position i of all the patterns is represented by a node at level i. a dictionary node is a special kind of node which marks the end of a pattern. This dictionary node is marked at the time of building DFA.
+\label{sec:dfa_const}
+Each node consists of a character is represents, a flag signifying whether or not it is a dictionary node, and a set of the patterns it represents.\\
+A dictionary node is a special kind of node which marks the end of a pattern or more, and those patterns are stored in the set of patterns it represents. \\
 
 \begin{enumerate}
 \item Forward Edge: Connecting a node representing character at position i in pattern p to the one representing the character at position i+1 in the same pattern.
@@ -167,12 +167,23 @@ Expanding a node means dequeuing it and enqueuing its child nodes.
 \begin{enumerate}
         \item Set the parent of the newly expanded node as the current node.
 
-        \item If the current node has a child node with the same value as node x, point x's reverse edge to that child. If it does nott, check that it is the root, and if so, point x's reverse edge to it. Otherwise go to the node pointed to by the reverse edge of the current node set it as the current node and repeat 4.b.
+        \item If the current node has a child node with the same value as node x, point x's reverse edge to that child, and if this child node happens to be a dictionary node for pattern p, mark node x as a dictionary of the same patter p. 
+	\item If this child node does not have the same value as node x, check that it is the root, and if so, point x's reverse edge to it. Otherwise go to the node pointed to by the reverse edge of the current node set it as the current node and repeat 4.b and 4.c.
 \end{enumerate}
 \end{enumerate}
 
 \subsubsection{Searching}
-It keeps an array of found patterns. The first character of the text is pass to DFA where current node is the root. If this character finds a forward edge meaning the character matches the node pointed by the forward edge, then the current node of DFA becomes the node that the forward edge points to. If this character does not finds a forward edge, the current node reminds the same. Either case, the second character of the text is then passed to the current node of DFA. If this second character of the text does not have a forward edge, it takes a reverse edge. When the current node of DFA reaches the dictionary node, it increments the occurrences array. It repeats this process until the end of the text has been reached.
+The search algorithm outputs any patterns it find.\\
+input: string of length n.\\
+\begin{enumerate}
+\item set the current node to root node
+\item for every character c of the input string:\\
+\begin{enumerate}
+\item if the current node has a forward edge pointing to a node x with the value of c, set the current node to be node x. 
+\item if there is not such a forward edge, then if the current node is not the root, set the node pointed to by the reverse edge as the current node and repeat step 2.a. if the current node is the root, skip the rest of this step and step 2.c,   
+\item If the current node is a dictionary node, output the patterns it represents.
+\end{enumerate}
+\end{enumerate}
 
 \subsection{Theoretical Analysis}
 k = total length of all patterns.\\
@@ -180,12 +191,24 @@ n = number of characters in input string\\
 z = pattern occurrences in the text\\
 
 \subsubsection{Preprocessing}
-
-A Deterministic Finite Automaton (DFA) is built according to the patterns as described. Setting up nodes and creating forward edges requires k time, and traversing the DFA to add the reverse edges take a maximum of k time. This yields a runtime of 2*k = O(k). 
+Preprocessing is done in two steps:
+A Deterministic Finite Automaton (DFA) is built according to the patterns as described in the previous section. Setting up nodes and creating forward edges requires k time.\\
+Traversing the DFA to add the reverse edges involves going forward k times and going up the reverse edges of a number of nodes. This number is bounded by the k, the total length of patterns since in the worst case a node at the end of each pattern will point back to the root. This gives a total of 2k for this step. \\
+Hence, the preprocessing yields a runtime of 3*k = O(k). 
 
 \subsubsection{Searching}
+Each character in the input text must be compared to the content of a node once, therefore a minimum of n computations is needed for comparisons, while outputting a pattern set of a dictionary node takes constant time. However, since pattern sets are output whenever they are found in the text, then the number of times the algorithm outputs a pattern, must be taken into consideration. The worst case is when patterns are found at virtually every position of the input string. For example, let the set of patterns be $\left\{a, a^2, ..., a^m\right\}$ where m is the length of the longest pattern, and let the text by $a^n$, such that $a^i$ is i a's.\\
+ 
+When n = 1, A(1) outputs $\left\{a\right\}$, the result of the first node.\\
+When n = 2, A(2) = $\left\{a\right\}$ + $\left\{a, a^2\right\}$ = A(1) + $\left\{a, a^2\right\}$.\\
+Assume that when n = i, then A(i) =  $\left\{a\right\}$+ $\left\{a, a^2\right\}$ + ... + $\left\{a, a^2, ..., a^i\right\}$.\\
+Then when n = i+1, A(i+1) = $\left\{a\right\}$ + $\left\{a, a^2\right\}$ +... + $\left\{a, a^2, ..., a^i\right\}$ + $\left\{a, a^2, ..., a^i, a^(i+1)\right\}$ which can be rewritten as 
+A(i+1) = A(i) + $\left\{a, a^2, ..., a^i, a^(i+1)\right\}$ \\
 
-The text is processed in a single pass. It is true that for a text of length n, minimum of n computations are required for comparing to DFA nodes. In addition, when a dictionary node was reached, this pattern would be inserted into array of found patterns. Thus the search runtime complexity is O(n+z) where z is occurrences of the matched patterns. 
+This shows that in the worst case, the number of pattern occurrences in the text, denoted as z, is the dominating factor in the time complexity, yeilding O(n+z).
+
+
+
 
 
 \newpage
