@@ -119,6 +119,78 @@ In the searching phase, the algorithm needs shift the pattern and sequentially m
 
 \subsection{complexity}
 
+\section{Aho-Corasick algorithm}
+Aho-Corasick algorithm \cite{aho} is a generalization of the Knuth-Morris-Pratt algorithm. It takes one or more patterns (a dictionary) to be searched in the text. Suppose, the total length of all patterns is k. Then, the algorithm pre-processes the patterns and constructs a Deterministic Finite Automaton (DFA) \cite{hopcroft} in O(k) time. The obtained DFA processes a text and reports pattern occurrences in linear time too -- O(n + z), where z is the number of occurrences to be found. The O(z) term is for that we assume that we can report all the occurrences in linear time. The example of the DFA is given in the figure \ref{dfa}.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/Example_DFA.png}
+\caption{A DFA representing a set of patterns {AAB, BC}}
+\label{dfa}
+\end{figure}
+
+\subsection{Construction of DFA}
+Let the index of the first character in a pattern be 1, and let i be an integer between 0 and the length of the longest pattern.
+\\
+We build a DFA of nodes and edges, where each unique character at position i of all the patterns is represented by a node at level i. a dictionary node is a special kind of node which marks the end of a pattern. This dictionary node is marked at the time of building DFA.
+
+\begin{enumerate}
+\item Forward Edge: Connecting a node representing character at position i in pattern p to the one representing the character at position i+1 in the same pattern.
+\item Reverse Edge: Connecting a node to another node representing the same value in a higher level (closer to the root) provided they have the same value parents, which is insured during the building.
+\end{enumerate}
+
+\subsubsection{Setting Up the Nodes and Forward Edges}
+\begin{enumerate}
+
+\item First a root node is created and set to be the current node. The first pattern is selecter and a pointer is set to point to the first character in it.
+
+\item If the current node does not have a forward edge to a node representing the current character, then such a node is created and a forward edge connects the current node to it. The new node becomes the the current node.
+
+\item If the current node has a forward edge to a node representing the current character, then that node becomes the current node.
+
+\item The pointer in the pattern moves to the next character
+
+\item If there are no more characters in the pattern, mark the node as dictionary node with the corresponding pattern, then select the next pattern in the list and make the pointer point to the first character in it. Set the current node to the root and repeat steps 2 through 5 until there are no more patterns in the list.
+\end{enumerate}
+
+
+
+
+\subsubsection{Setting Up the Reverse Edges}
+
+Expanding a node means dequeuing it and enqueuing its child nodes.
+\begin{enumerate}
+\item Start from the node and expand it into its children, put the child nodes into a queue.
+
+\item Point the reverse edges of the children of the root back to the root.
+
+\item Expand the node at the front of the queue.
+
+\item For each node x of the children of the newly expanded node do the following:
+
+\begin{enumerate}
+        \item Set the parent of the newly expanded node as the current node.
+
+        \item If the current node has a child node with the same value as node x, point x's reverse edge to that child. If it does nott, check that it is the root, and if so, point x's reverse edge to it. Otherwise go to the node pointed to by the reverse edge of the current node set it as the current node and repeat 4.b.
+\end{enumerate}
+\end{enumerate}
+
+\subsubsection{Searching}
+It keeps an array of found patterns. The first character of the text is pass to DFA where current node is the root. If this character finds a forward edge meaning the character matches the node pointed by the forward edge, then the current node of DFA becomes the node that the forward edge points to. If this character does not finds a forward edge, the current node reminds the same. Either case, the second character of the text is then passed to the current node of DFA. If this second character of the text does not have a forward edge, it takes a reverse edge. When the current node of DFA reaches the dictionary node, it increments the occurrences array. It repeats this process until the end of the text has been reached.
+
+\subsection{Theoretical Analysis}
+k = total length of all patterns.\\
+n = number of characters in input string\\
+z = pattern occurrences in the text\\
+
+\subsubsection{Preprocessing}
+
+A Deterministic Finite Automaton (DFA) is built according to the patterns as described. Setting up nodes and creating forward edges requires k time, and traversing the DFA to add the reverse edges take a maximum of k time. This yields a runtime of 2*k = O(k). 
+
+\subsubsection{Searching}
+
+The text is processed in a single pass. It is true that for a text of length n, minimum of n computations are required for comparing to DFA nodes. In addition, when a dictionary node was reached, this pattern would be inserted into array of found patterns. Thus the search runtime complexity is O(n+z) where z is occurrences of the matched patterns. 
+
 \newpage
 \bibliography{references}{}
 \nocite{*}
