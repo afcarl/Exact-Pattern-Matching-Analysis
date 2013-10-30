@@ -21,6 +21,8 @@
 *.snm
 *.synctex.gz
 *.toc
+*.bbl
 
 # Other files
 *.pdf
+.DS_Store
