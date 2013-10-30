@@ -94,8 +94,8 @@ A variety of algorithms have been developed for exact pattern matching, the most
 
 \newpage
 
-\section{Boyre-Moore Algorithm}
-Boyre Moore algorithm \cite{bm_fast} searches for all the occurrences of the pattern in the text. It is in some way similar to the naive search algorithm. Initially, it aligns the first character in P with the first character in T. The algorithm then compares characters between P and T sequentially from right to left. Once a mismatch occurs, a shift rule is applied thus moving the pattern by $s\ge 1$. The algorithm is basically divided into two stages: preprocessing and searching. There are two different preprocessing approaches in the literature: Bad Character Rule and Good Suffix Tree \cite{bm_tbc}. We decided to choose the Bad Character rule due to its simplicity and applicability to our dataset. In the following sections, we describe the two stages of the algorithm.
+\section{Boyer-Moore Algorithm}
+Boyer Moore algorithm \cite{bm_fast} searches for all the occurrences of the pattern in the text. It is in some way similar to the naive search algorithm. Initially, it aligns the first character in P with the first character in T. The algorithm then compares characters between P and T sequentially from right to left. Once a mismatch occurs, a shift rule is applied thus moving the pattern by $s\ge 1$. The algorithm is basically divided into two stages: preprocessing and searching. There are two different preprocessing approaches in the literature: Bad Character Rule and Good Suffix Tree \cite{bm_tbc}. We decided to choose the Bad Character rule due to its simplicity and applicability to our dataset. In the following sections, we describe the two stages of the algorithm.
 
 
 \begin{figure}[h!]
@@ -111,7 +111,7 @@ In the preprocessing stage, the algorithm makes use of the alphabet $\Sigma$ and
 
 \subsection{Searching Phase}
 
-In the searching phase, the algorithm shifts the pattern and sequentially matches it with the aligned text. Starting from the rightmost character in P, the algorithm checks the aligned character in T. If the pair of characters are matching, it sequentially continues the check to the next left character. If a mismatch occurs at position j in P, the algorithm shifts P according to the mismatched character x in the text. For example, if at position j, the text contains a character that is not found in P, the pattern is shifted by j. However, if the mismatched character is found in P, the pattern is shifted by j-i, where i corresponds to the rightmost occurrence of this character in P. The index i of the last occurrence is retrieved from table D (i=D[j,x] where x is the character in the text). Figure \ref{search} shows the searching phase for the example shown in the previous section. The pseudocode of Boyre Moore algorithm is shown below.\\
+In the searching phase, the algorithm shifts the pattern and sequentially matches it with the aligned text. Starting from the rightmost character in P, the algorithm checks the aligned character in T. If the pair of characters are matching, it sequentially continues the check to the next left character. If a mismatch occurs at position j in P, the algorithm shifts P according to the mismatched character x in the text. For example, if at position j, the text contains a character that is not found in P, the pattern is shifted by j. However, if the mismatched character is found in P, the pattern is shifted by j-i, where i corresponds to the rightmost occurrence of this character in P. The index i of the last occurrence is retrieved from table D (i=D[j,x] where x is the character in the text). Figure \ref{search} shows the searching phase for the example shown in the previous section. The pseudocode of Boyer Moore algorithm is shown below.\\
 \begin{lstlisting}
 Algoritm: BMMatch(T, P):
 Input: Text T (n characters) and pattern P (k characters)
@@ -224,7 +224,7 @@ input: string of length n.\\
 \subsection{Theoretical Analysis}
 k = total length of all patterns.\\
 n = number of characters in input string\\
-z = pattern occurrences in the text\\
+z = pattern occurrences in the text
 
 \subsubsection{Preprocessing}
 Preprocessing is done in two steps:
@@ -241,7 +241,8 @@ Assume that when n = i, then A(i) =  $\left\{a\right\}$+ $\left\{a, a^2\right\}$
 Then when n = i+1, A(i+1) = $\left\{a\right\}$ + $\left\{a, a^2\right\}$ +... + $\left\{a, a^2, ..., a^i\right\}$ + $\left\{a, a^2, ..., a^i, a^(i+1)\right\}$ which can be rewritten as 
 A(i+1) = A(i) + $\left\{a, a^2, ..., a^i, a^(i+1)\right\}$ \\
 
-This shows that in the worst case, the number of pattern occurrences in the text, denoted as z, is the dominating factor in the time complexity, yeilding O(n+z). The term z at this worst case senario has similar behaviour to the naive search and bounded by naive search time of $n \times k$. 
+This shows that in the worst case, the number of pattern occurrences in the text, denoted as z, is the dominating factor in the time complexity, yeilding O(n+z). In the worst case the term $z$ grows similarly to the sum of running time of applying Naive Search on each pattern in the pattern set, which will be $k\times n$.
+
 
 
 \newpage
@@ -304,12 +305,13 @@ Applying the algorithms on these datasets will show practical results on the ana
 
 \newpage
 \section{Discussion}
-Each algorithm has one time pre-processing cost. Aho corasick algorithm has linear search cost to the length of the input text and the occurrences of the patterns in the input text. In the worst case, the term $z$ behaves similarly to naive search of term $k\times n$. This happens where the alphabet in $|\Sigma|$ for the input text and the patterns have a single character.
+Each algorithm has a one time pre-processing cost. Aho Corasick algorithm has linear search cost to the length of the input text and the occurrences of the patterns in the input text. \\
+When the alphabet in $|\Sigma|$ has a single character, the term $z$ in Aho Corasick grows similarly to the sum of running time of applying Naive Search on each pattern in the pattern set, which will be $k\times n$, resulting in the worst case running time for Aho Corasick. However, such a small alphabet has a positive effect on Boyer-Moore, resulting in a smaller preprocessing time.
 
 \begin{center}
 	\begin{tabular}{| l | l | l | l |}
 		\hline
-		& Boyre-Moore & Aho Corasick & Suffix Tree \\
+		& Boyer-Moore & Aho Corasick & Suffix Tree \\
 		\hline
 		Pre-processing & O($|\Sigma|$) & O($k$) & O() \\
 		\hline
