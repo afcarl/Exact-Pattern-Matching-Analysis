@@ -309,7 +309,7 @@ So, the new suffix function $f_{i+1}$ should connect all the new final states $F
 \begin{figure}[h!]
 \centering
 \includegraphics[width=0.8\textwidth]{figures/suffix-trie-eg.png}
-\caption{An example of building a suffix trie for string "cacao". We start from the empty string, and the suffix tree augmented DFA consists of only $root$ and $\perp$ states at this stage. Then we add letter by letter the whole text. For each letter, we perform the above mentioned 5-step iterative algorithm to update the transition and suffix functions $g$ and $f$.}
+\caption{An example of building a suffix trie for the string "cacao". We start from the empty string, and the suffix trie augmented DFA consists of only $root$ and $\perp$ states at this stage. Then we add letter by letter the whole text. For each letter, we perform the above mentioned 5-step iterative algorithm to update the transition and suffix functions $g$ and $f$.}
 \label{fig:siffix-trie}
 \end{figure}
 
@@ -328,13 +328,15 @@ Now, we denote the following structure as suffix tree:
 STree(T) = \left\{ Q' \cup \{\perp\}, root, g', f' \right\}.
 \end{equation}
 
+Since, we keep only the explicit states in the suffix tree, but we need to have anyway access to all the states including implicit ones, we introduce so called \textit{reference pair} $(\bar s, w)$ which consists of an explicit state $\bar s$ and a substring $w$ of the text $T$. Using such pairs, we can easily refer to all the explicit as well as implicit states of the $STree(T)$. We name a reference pair \textit{canonical}, if the state $\bar s$ of the pair has the maximum possible level in the tree, and hence $w$ is the shortest possible.
+
 \subsubsection{Suffix Tree Analysis}
 Suffix tree has two components: the tree itself and the string $T$. It is of linear size in $n \equiv |T|$ because $Q'$ has at most $n$ leaves (at most one leaf for each non-empty suffix), and therefore $Q'$ has to contain at most $n - 1$ branching states (when $n > 1$) \footnote{To understand that a tree with branching factor $b >= 2$ and with $n$ leafs, has the total number of nodes equal to $O(n)$, we can see that the number of all the nodes can be upper bounded with $1 + 2 + 2^2 + \dots + 2^d$, where $d = \log_2n$, and hence the number of nodes will be $O(n)$. If we do a little more strict derivations, we can show that in fact the number of all the leafs in such a tree is upper bounded by $2n - 1$, where $n$ is the number of leaves.}. Now, since the alphabet is finite, the number of transitions will be also bounded, and it will be in our case equal to $O(n)$. The number of suffix links we have to store will be less than or equal to the number of all the explicit states, i.e. $O(n)$. So, this proves that the constructed suffix tree is a linear in memory data structure.
 
 \subsubsection{Suffix Tree Online Construction Algorithm}
 This part is the most complex part. Finally, we need to enhance the proposed above algorithm for a suffix trie construction to make it construct a suffix tree. Again, we are following the original paper~\cite{ukkonen1995line}, and we will skip some of the minor steps of the derivations to keep our explanation as brief as it is possible.\\
 
-First, we need to introduce some additional notations, and a lemma without a proof (the proof is essential and completely based on considering two different cases of the algorithm for an $STrie$ construction).
+First, we need to introduce some additional notations, and a lemma without a proof (the proof is essential and completely based on considering two different cases of the algorithm for an $STrie$ construction). Lets denote all the states corresponding to suffixes in the currently processed prefix $T^i$ by $\bar s_1, \bar s_2, \dots, \bar s_i$ where $\bar s_h = \overline{t_1 t_2 \dots t_{i - h + 1}}$.
 
 \begin{lemma}
 \label{lemma:active-end-point}
@@ -343,15 +345,72 @@ $1 < h < j'$, such that, for $1 < h < j$, the new transition expands an old bran
 the trie that ends at leaf $\bar{s}_h$, and, for $j < h < j'$, the new transition initiates a new branch from $\bar{s}_h$. Algorithm 1 does not create any other transitions.
 \end{lemma}
 
-Further, we call the state $\bar{s}_j$ the \textit{active point} and the state $\bar{s}_{j'}$ the \textit{end point} of $STrie(T^i)$. According to this lemma, there are two important segments of the boundary path: the segment in which we add new transitions to the traversed leaves ($1 < h < j'$, right before active point), and the segment in which we split the states and increase their branching factor ($j < h < j'$, between the active point and the end point).\\
+Further, we call the state $\bar{s}_j$ the \textit{active point} and the state $\bar{s}_{j'}$ the \textit{end point} of $STrie(T^i)$. According to this lemma, there are two important segments of the boundary path: the segment in which we add new transitions to the traversed leaves ($1 < h < j'$, right before active point), and the segment in which we split the states and increase their branching factor ($j \le h < j'$, between the active point and the end point).\\
 
-Going back to $STree(T^i)$, the both updates mentioned in lemma~\ref{lemma:active-end-point}, could be represented as following. For the updates with no splits we can just update the transition, adding $t_{i+1}$ symbol: For example we have a transition to a leaf (we also call it an \textit{open transition}) $g'(\bar{s}, (k, i)) = \bar{r}$ where the pointer $i$ points to the last symbol of the previous text prefix $T^i$. So, in this case we need to update the transition and make it $g'(\bar{s}, (k, i+1)) = \bar{r}$. Now, again, the right pointer $i+1$ now points right to the end of the current text prefix $T^{i+1}$. We can use this property and all the leaf transitions we can represent as $g'(\bar{s}, (k, \infty)) = \bar{r}$, denoting the pointer to the last symbol of the current prefix as $\infty$. Such notation makes us do nothing to update all the states in $STree(T^{i+1})$ for all the states $s_h$ before the active point ($1 < h < j'$).
+Now, we go back to $STree(T^i)$. The updates with no splits we can just update the transition, adding $t_{i+1}$ symbol: For example we have a transition to a leaf (we also call it an \textit{open transition}) $g'(\bar{s}, (k, i)) = \bar{r}$ where the pointer $i$ points to the last symbol of the previous text prefix $T^i$. So, in this case we need to update the transition and make it $g'(\bar{s}, (k, i+1)) = \bar{r}$. Now, again, the right pointer $i+1$ now points right to the end of the current text prefix $T^{i+1}$. We can use this property and all the leaf transitions we can represent as $g'(\bar{s}, (k, \infty)) = \bar{r}$, denoting the pointer to the last symbol of the current prefix as $\infty$. Such notation automatically updates all the states $s_h$ in $STree(T^{i+1})$ before the active point ($1 < h < j'$).\\
 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/suffix-tree-eg.png}
+\caption{An example of building a suffix tree for the string "cacao". Notice that the suffix tree is much more concise than the suffix trie for the same example string.}
+\label{fig:siffix-tree}
+\end{figure}
 
+Finally, we need to consider the procedure of adding transitions to states $s_h$ along the boundary path between the active point and the end point ($j \le h < j'$) splitting the nodes. We start from the state $s_j$ (the active point). Lets denote the canonical reference pair of the active point by $bar s, w)$, which is by definition (see lemma~\ref{lemma:active-end-point}) is the same as $(\bar s, (k, i-1))$. We first check, if the end point coincides with the canonical point. If yes, we are done. Otherwise, we should perform create a new branch, splitting the current state if it is implicit. The newly created transition will be $g'(\bar s_h, (i, \infty)) = \bar s'_h$ where $\bar s'_h$ is a new leaf. Also, if $\bar s_h$ was implicit and became explicit by splitting, a new suffix function link $f'(s_h)$ should be added. Then we advance the construction to the next state $\bar s_{h+1}$.\\
+
+Before we start working with the next state, we need to make sure that its reference pair is canonical. For this purpose, we use procedure \textit{canonize}, which updates the reference pair of the current state to the canonical representation \footnote{To see how exactly work this procedure (along with some additional subtle moments of the algorithm) please refer to the original paper~\cite{ukkonen1995line}. In this report, we decided to omit some of the minor, but important points for the sake of space.}.\\
+
+So, the final procedure that updates $STree(T^i)$ to the $STree(T^{i+1})$ is as following:
+
+\begin{enumerate}
+  \item Let the current point be the active point,
+  \item canonize the current point,
+  \item create a new transition from the current point to a new state,
+  \item if current point is not root, create a suffix link from the current point,
+  \item if necessary check and split the current state,
+  \item repeat steps (2)--(5) until the current point is not equal to the end point.
+\end{enumerate}
+
+\subsubsection{Construction Algorithm Analysis}
+The main theorem that was stated in~\cite{ukkonen1995line} is
+
+\begin{theorem}
+\label{theorem:suffix-tree-theorem}
+The proposed algorithm constructs the suffix tree $STree(T)$ for a string $T = t_1 t_2 \dots t_n$ on-line in time O(n).
+\end{theorem}
+
+The idea of the proof is the following. We divide the runtime of the algorithm into two components: (1) the total time for the procedure \textit{canonize}, (2) the repeated traversals along the boundary path from the active point to the end point doing splits along this way where it is necessary. In~\cite{ukkonen1995line} it was shown that both \textit{canonize} and repeated traversals consist of constant time operations (checks, state splits, etc.), the number of which is O(n)\footnote{To be precise, it was shown, that the number of constant time steps done during traversals $\le 2n$, and it is $O(n)$ with some constant around 2 for the \textit{canonize}.}. So, the total time of the construction algorithm will be linear.
+
+\subsubsection{Pattern Matching using Suffix Trees}
+Given a pattern $P$ and a text $T$, the pattern matching problem is to find all occurrences of $P$ in $T$. Let $|P| = k$ and $|T| = n$. Typically, $n >> k$. Moreover, $T$ remains fixed in many applications and the query is repeated for many different patterns. For example, $T$ could be a text document and $P$ could represent a word search. Or, $T$ could be an entire database of DNA sequences and $P$ denotes a substring of a query sequence for homology (similarity) search. Thus, it is beneficial to preprocess the text $T$ so that queries can be answered as efficiently as possible.
+
+\par The pattern matching problem can be solved in optimal $O(k+z)$ time using $STree(T)$, where z is the number of occurrences of $P$ in $T$. Suppose $P$ occurs in $T$ starting from position $i$. Then, $P$ is a prefix of suffix in $T$. It follows that $P$ matches the path from root to leaf labelled $i$ in $STree$. This property results in the following simple algorithm: Start from the root of $STree$ and follow the path matching characters in $P$, until $P$ is completely matched or a mismatch occurs. If $P$ is not fully matched, it does not occur in $T$. Otherwise, each leaf in the subtree below the matching position gives an occurrence of $P$. The positions can be enumerated by traversing the subtree in time proportional to the size of the subtree. As the number of leaves in the subtree is $z$, this takes $O(z)$ time. If only one occurrence is of interest, the suffix tree can be preprocessed in $O(n)$ time such that each internal node contains the label of one of the leaves in its subtree. Thus, the problem of whether $P$ occurs in $T$ or the problem of finding one occurrence can be answered in $O(k)$ time.
+
+\subsubsection{Example of Matching a Pattern with a Suffix Tree}
+Suppose that we have a suffix tree of a text $banana$, as shown in figure~\ref{fig:suffix-tree-ex}. The length of text is 6, so it has 7 leaves. Each leaf represents a suffix of the text. From figure~\ref{fig:suffix-tree-ex}, there are 7 suffixes, such as $\$$, $a\$$, $na\$$, $ana\$$, $nana\$$, $anana\$$, $banana\$$.
+
+\begin{figure}
+\centering
+\includegraphics[width=3.5in]{figures/suffixtree.png}
+\caption{Suffix tree of a text: $banana$}
+\label{fig:suffix-tree-ex}
+\end{figure}
+
+\par For a given pattern $Q$, the algorithm will follow a unique path down from root of $T$ according to characters in $Q$. If all characters of $Q$ is found to be a prefix of such a path, then return the labels of some leaves below this path. If there comes a mismatch, then return no match found. For example, for a given pattern $Q = \{nan\}$ and a given pattern $Q = \{anab\}$, the algorithm works as shown in figure~\ref{fig:suffix-tree-matching-ex}.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=5.5in]{figures/example.png}
+\caption{Examples of pattern $nan$ and $anab$}
+\label{fig:suffix-tree-matching-ex}
+\end{center}
+\end{figure}
+
+\par Basically, for every character in a given pattern, it requires $O(1)$ time to compare with the character in the suffix tree. Therefore, it needs $k*O(1)$, namely, $O(k)$ time to report a matching, where $k$ is the length of a given pattern. Assume that there are $z$ matchings, therefore the leaves of the sub-tree that below the end of the path is equal to $z$. Thus it requires $O(z)$ time to report all the leaves that below the end of the path. Therefore, the total time complexity to report all the matchings is $O(k+z)$, where $k$ denotes the length of the pattern and $z$ denotes the number of the matchings.
 
 \newpage
 \section{Dataset}
-We will apply these algorithms on an available dataset of DNA sequences and natural language text, to find specific sequence motifs in the first, and words and phrases in the latter. With regards to the biological dataset, we selected  the DNA sequence of  human chromosome 1 in fasta format as a searching test. The DNA alphabet consists of four elements, $\Sigma$ = \{A, C, G, T\}, that represent  the four nitrogenous bases. We also chose three different patterns for our experimental measurements. As for the natural language data set, we will search for specific phrases of varying lengths. We will compare the performance in the two data sets to highlight the effect of the size of the alphabet and pattern length.
+We will apply these algorithms on an available dataset of DNA sequences and natural language text, to find specific sequence motifs in the former, and words and phrases in the latter. With regards to the biological dataset, we selected the DNA sequence of human chromosome 1 in fasta format as a searching test. The DNA alphabet consists of four elements, $\Sigma = \{A,\ C,\ G,\ T\}$, that represent  the four nitrogenous bases. We also chose three different patterns for our experimental measurements. As for the natural language data set, we will search for specific phrases of varying lengths. We will compare the performance in the two data sets to highlight the effect of the size of the alphabet and pattern length.
 Applying the algorithms on these datasets will show practical results on the analytical complexities that we examined and the difference in performance of the three above mentioned algorithms on the tested domains of application.
 
 \newpage
