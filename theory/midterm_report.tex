@@ -134,21 +134,38 @@ Being able to consider suffix tries, and following~\cite{ukkonen1995online}, we 
 STrie(T) = \left\{Q \cup \{\perp\}, root, F, g, f \right\}
 \end{equation}
 
-which is a deterministic finite-state automaton (DFA) which has a tree-shaped transition graph representing the trie for $\sigma(T)$. It is augmented with so called \textit{suffix function} $f$ and with an auxiliary state $\perp$. In the presented notations, the set $Q$ is the set of all the states of $STrie(T)$, which could be put into one-to-one correspondence with the substrings of $T$, i.e. with all such $x$ that $T = a\ x\ v$, where $a$ is some prefix of $T$, and $v$ is some suffix of $T$. The initial state $root$ corresponds to the empty string $\varepsilon$, and the set of final states $F$ corresponds to all the suffixes $\sigma(T)$. Finally, the transition function $g$ is defined as $g(\bar{x}, a) = \bar{y}$ for all $\bar{x}, \bar{y} \in Q$ such that $y = xa$, where $a \in \Sigma$; $g(\perp, a) = root$ for all $a \in \Sigma$.\\
+which is a deterministic finite-state automaton (DFA) which has a tree-shaped transition graph representing the trie for $\sigma(T)$. It is augmented with so called \textit{suffix function} $f$ and with an auxiliary state $\perp$. In the presented notations, the set $Q$ is the set of all the states of $STrie(T)$, which could be put into one-to-one correspondence with the substrings of $T$, i.e. with all such $x$ that $T = a\ x\ v$, where $a$ is some prefix of $T$, and $v$ is some suffix of $T$. The initial state $root$ corresponds to the empty string $\varepsilon$, and the set of final states $F$ corresponds to all the suffixes $\sigma(T)$. Latin characters with bars will denote states; characters without bars will denote symbols or some sequences of symbols from the alphabet $\Sigma$; $\varepsilon$ will denote the empty string. Finally, the transition function $g$ is defined as $g(\bar{x}, a) = \bar{y}$ for all $\bar{x}, \bar{y} \in Q$ such that $y = xa$, where $a \in \Sigma$; $g(\perp, a) = root$ for all $a \in \Sigma$.\\
 
 Now, the suffix function $f$ is defined for each state $\bar{x} \in Q$ as follows. If $\bar{x}$ is not $root$, then $x = az$ for some $a \in \Sigma$, and we set $f(\bar{x}) = \bar{z}$. If it is $root$, $f(root) = \perp$.\\
 
-To on-line construct a suffix trie reading a text $T$ from left to right symbol by symbol, we can apply the following simple algorithm. Suppose, we have already read some prefix of the text $T^i = t_1 \dots t_i$, and have already constructed a $STrie(T^i)$. Now, we read the next symbol $t_{i+1}$ from the text, and we need to add it to the structure and obtain $STrie(T^{i+1})$. One can notice, that all the new suffixes of $T^{i+1}$ could be obtained by concatenation of $t_{i+1}$ symbol to all the previous suffixes, i.e.
+To online construct a suffix trie by reading a text $T$ from left to right symbol by symbol, we should notice the following. Suppose, we have already read some prefix of the text $T^i = t_1 \dots t_i$, and have already constructed a $STrie(T^i)$. Now, we read the next symbol $t_{i+1}$ from the text, and we need to add it to the structure and obtain $STrie(T^{i+1})$. One can notice, that all the new suffixes of $T^{i+1}$ could be obtained by concatenation of $t_{i+1}$ symbol to all the previous suffixes, i.e.
 
 $$
 \sigma(T^{i+1}) = \sigma(T^i)t_i \cup \varepsilon.
 $$
 
+By construction, the $STrie(T^i)$ accepts $\sigma(T^i)$, and we want to make it accept $\sigma(T^{i+1})$. For achieving this, we need to add $t_{i+1}$ transitions to all the $r \in F_i$ which don't have such. By doing this, we will properly update our transition function $g_i$ to $g_{i+1}$, and also we will get final states $F_i$ updated to $F_{i+1}$.\\
+
+Also, we should update the suffix function $f_i$ up to $f_{i+1}$, such that for every $\bar{r} \in F_{i+1}$ the new suffix function $f_{i+1}(\bar{r}) = \bar{s}$, for which $r = as$, where $a \in \Sigma$. In order to do such an update, we notice that if $r \in F_i$, then there exists such $0 \le j \le i$, such that $r = f_i^j(\overline{t_1...t_i})$. This means that the suffix function connects all the final states in the $STrie(F_i)$ into a single path. We denote this path as the \textit{boundary path}.\\
+
+So, the new suffix function $f_{i+1}$ should connect all the new final states $F_{i+1}$ and form a new boundary path. To achieve this, we can traverse all the $F_i$ states along the current boundary path, and make updates for every state on this path, adding a suffix link where it is necessary and adding a transition for a new symbol $t_{i+1}$ where it is necessary. Finally, it was shown in the original paper~\cite{ukkonen1995online} that while traversing the boundary path, if we encountered a state $\bar{z}$ that does have a transition $t_{i+1}$, there is no need to further continue traversing, since all of the further suffix successors of the state $\bar{z}$ are up-to-date and have both the right suffix links and also the right transitions $t_{i+1}$. Finally, the algorithm is going to be as it follows.
 
 \begin{enumerate}
-  \item 
+  \item Start from the state $\overline{t_1 t_2 \dots t_i}$ (the whole prefix preprocessed up to now).
+  \item If there is no transition from the current state for symbol $t_{i+1}$, create a new state for such a transition. Memorize the newly created state.
+  \item Follow the suffix link from the current state and again perform step (2).
+  \item Create a suffix link from the last created state (on step 3) for transition on symbol $t_{i+1}$, to the state created right before that (on step 2).
+  \item Repeat steps (2), (3) and (4) until we find that the current state has a transition on $t_{i+1}$.
 \end{enumerate}
 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/suffix-trie-eg.png}
+\caption{An example of building a suffix trie for string "cacao". We start from the empty string, and the suffix tree augmented DFA consists of only $root$ and $\perp$ states at this stage. Then we add letter by letter the whole text. For each letter, we perform the above mentioned 5-step iterative algorithm to update the transition and suffix functions $g$ and $f$.}
+\label{fig:siffix-trie}
+\end{figure}
+
+An example of how this algorithm works is presented in figure~\ref{fig:siffix-trie}. The algorithm obviously does a constant number of operations each of its iterations, and, in the worst case, it should visit all the nodes of the suffix trie $STrie(T^i)$ to update it up to $STrie(T^{i+1})$. So, it is optimal in the sense that its time complexity is proportional to the size of its end result $STrie(T)$. On the other hand, the size of $STrie(T)$ can be quadratic in $n = |T|$. To overcome this issue, we introduce the so called \textit{suffix tree} structure which is based on suffix trie, but is more concise and takes less memory and time to be built.
 
 \subsection{Suffix Tree}
 
