@@ -227,15 +227,10 @@ n = number of characters in input string\\
 z = pattern occurrences in the text\\
 
 \subsubsection{Preprocessing}
-<<<<<<< HEAD
 Preprocessing is done in two steps:
 A Deterministic Finite Automaton (DFA) is built according to the patterns as described in the previous section. Setting up nodes and creating forward edges requires k time.\\
 Traversing the DFA to add the reverse edges involves going forward k times and going up the reverse edges of a number of nodes. This number is bounded by the k, the total length of patterns since in the worst case a node at the end of each pattern will point back to the root. This gives a total of 2k for this step. \\
 Hence, the preprocessing yields a runtime of 3*k = O(k). 
-=======
-
-A Deterministic Finite Automaton (DFA) is built according to the patterns as described. Setting up nodes and creating forward edges requires k time, and traversing the DFA to add the reverse edges take a maximum of k time. This yields a runtime of 2*k = O(k).
->>>>>>> b811412d288747a6cd25adfdf0c0e33b6aca9a54
 
 \subsubsection{Searching}
 Each character in the input text must be compared to the content of a node once, therefore a minimum of n computations is needed for comparisons, while outputting a pattern set of a dictionary node takes constant time. However, since pattern sets are output whenever they are found in the text, then the number of times the algorithm outputs a pattern, must be taken into consideration. The worst case is when patterns are found at virtually every position of the input string. For example, let the set of patterns be $\left\{a, a^2, ..., a^m\right\}$ where m is the length of the longest pattern, and let the text by $a^n$, such that $a^i$ is i a's.\\
@@ -247,13 +242,6 @@ Then when n = i+1, A(i+1) = $\left\{a\right\}$ + $\left\{a, a^2\right\}$ +... + 
 A(i+1) = A(i) + $\left\{a, a^2, ..., a^i, a^(i+1)\right\}$ \\
 
 This shows that in the worst case, the number of pattern occurrences in the text, denoted as z, is the dominating factor in the time complexity, yeilding O(n+z).
-
-
-
-<<<<<<< HEAD
-=======
-The text is processed in a single pass. It is true that for a text of length n, minimum of n computations are required for comparing to DFA nodes. In addition, when a dictionary node was reached, this pattern would be inserted into array of found patterns. Thus the search runtime complexity is O(n+z) where z is occurrences of the matched patterns.
->>>>>>> b811412d288747a6cd25adfdf0c0e33b6aca9a54
 
 
 \newpage
