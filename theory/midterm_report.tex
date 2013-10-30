@@ -12,12 +12,15 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{listings}
+
 \usepackage{sectsty} % Allows customizing section commands
 \allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
 
 \usepackage{fancyhdr} % Custom headers and footers
+
 \usepackage{cite}
 \bibliographystyle{plain}
+
 \pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
 \fancyhead{} % No page header - if you want one, create it in the same way as the footers below
 \fancyfoot[L]{} % Empty left footer
@@ -32,6 +35,22 @@
 \numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
 
 \setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+% Definitions of theorem environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+%\newenvironment{proof}[1][Proof]{\begin{trivlist}
+%\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
 
 %----------------------------------------------------------------------------
 %	TITLE SECTION
@@ -74,7 +93,7 @@ Pattern matching remains to this day an extensively studied problem. The exponen
 
 One optimal algorithm that can be applied to all such applications which include different data formats has not been established. Therefore, we intend to test the performance of three different algorithms: Aho-Corasick, Suffix-tree, and Boyer-Moore algorithms. We will theoretically analyse and compare the time complexities of the above three algorithms. We will also apply them on texts, patterns, and alphabets of various types and lengths.\\
 
-Pattern matching can be defined as follows\cite{intro}: Given a text T of length n and a pattern P of length k over some alphabet $\Sigma$, where n > k, the exact pattern matching problem consists of finding all occurrences z of the pattern P in the text T.\\
+Pattern matching can be defined as follows~\cite{intro}: Given a text T of length n and a pattern P of length k over some alphabet $\Sigma$, where n > k, the exact pattern matching problem consists of finding all occurrences z of the pattern P in the text T.\\
 
 For example, let p = aba and t = abaababa over alphabet $\Sigma$ = \{a,b\}. As illustrated in Figure \ref{matching}, three occurrences of the considered pattern appear in the text, at locations 1, 4, and 6.
 
@@ -108,12 +127,12 @@ Boyer Moore algorithm \cite{bm_fast} searches for all the occurrences of the pat
 \end{figure}
 
 \subsection{Preprocessing Stage}
-In the preprocessing stage, the algorithm makes use of the alphabet $\Sigma$ and the pattern P. A two dimensional table D is constructed by processing the pattern according to the available alphabet. D is of size $k\times|\Sigma|$ where for each mismatch index in P, the position of rightmost occurrence of a character in $\Sigma$ is stored. Figure \ref{table} shows an example of the table stored by processing the pattern GCAGAGAG based on the DNA alphabet=\{A,C,G,T\}. Starting from the last row corresponding to a mismatch occurring at position i=k in P, i=8 for this example, the algorithm scans P to find the rightmost index of the given character. In the below example, the last occurrence of A before position 8 is 7, G is 6, C is 2, and T is 0. It is important to note here that if a character does not exist in the pattern, its position in the table is always 0. The algorithm iterates from i=k to 1. If the mismatch occurs in position i-1, the algorithm updates only the value for the specific character placed in this position, A for this example, and all the other values remain the same as D[i,x]. The last occurrence of A before position 7 is 5, while G, C, and T stay the same.
+In the preprocessing stage, the algorithm makes use of the alphabet $\Sigma$ and the pattern P. A two dimensional table D is constructed by processing the pattern according to the available alphabet. D is of size $k\times|\Sigma|$ where for each mismatch index in P, the position of rightmost occurrence of a character in $\Sigma$ is stored. Figure \ref{fig:table} shows an example of the table stored by processing the pattern GCAGAGAG based on the DNA alphabet=\{A,C,G,T\}. Starting from the last row corresponding to a mismatch occurring at position i=k in P, i=8 for this example, the algorithm scans P to find the rightmost index of the given character. In the below example, the last occurrence of A before position 8 is 7, G is 6, C is 2, and T is 0. It is important to note here that if a character does not exist in the pattern, its position in the table is always 0. The algorithm iterates from i=k to 1. If the mismatch occurs in position i-1, the algorithm updates only the value for the specific character placed in this position, A for this example, and all the other values remain the same as D[i,x]. The last occurrence of A before position 7 is 5, while G, C, and T stay the same.
 
 
 \subsection{Searching Phase}
 
-In the searching phase, the algorithm shifts the pattern and sequentially matches it with the aligned text. Starting from the rightmost character in P, the algorithm checks the aligned character in T. If the pair of characters are matching, it sequentially continues the check to the next left character. If a mismatch occurs at position j in P, the algorithm shifts P according to the mismatched character x in the text. For example, if at position j, the text contains a character that is not found in P, the pattern is shifted by j. However, if the mismatched character is found in P, the pattern is shifted by j-i, where i corresponds to the rightmost occurrence of this character in P. The index i of the last occurrence is retrieved from table D (i=D[j,x] where x is the character in the text). Figure \ref{search} shows the searching phase for the example shown in the previous section. The pseudocode of Boyer Moore algorithm is shown below.\\
+In the searching phase, the algorithm shifts the pattern and sequentially matches it with the aligned text. Starting from the rightmost character in P, the algorithm checks the aligned character in T. If the pair of characters are matching, it sequentially continues the check to the next left character. If a mismatch occurs at position j in P, the algorithm shifts P according to the mismatched character x in the text. For example, if at position j, the text contains a character that is not found in P, the pattern is shifted by j. However, if the mismatched character is found in P, the pattern is shifted by j-i, where i corresponds to the rightmost occurrence of this character in P. The index i of the last occurrence is retrieved from table D (i=D[j,x] where x is the character in the text). Figure \ref{fig:search} shows the searching phase for the example shown in the previous section. The pseudocode of Boyer Moore algorithm is shown below.\\
 \begin{lstlisting}
 Algoritm: BMMatch(T, P):
 Input: Text T (n characters) and pattern P (k characters)
@@ -250,12 +269,12 @@ This shows that in the worst case, the number of pattern occurrences in the text
 \newpage
 
 \section{Suffix-tree Pattern Matching}
-As the third part of our comparative study, we propose a pattern matching algorithm that relies on so called suffix tree data structure. Suffix tree is a well known data structure which is commonly used in industrial and scientific applications of pattern matching today. Being a concise representation of a text composed over a finite alphabet, suffix tree, or more general suffix automaton, is a common way to compress large amounts of textual information, and it is widely used also in databases. In our study, we will perform tests of suffix tree base pattern matching algorithm, and compare it against the aforementioned Boyer-More and Aho-Corasick algorithms, trying to get an insight on when should one chose either of these algorithms.\\
+As the third part of our comparative study, we consider a pattern matching algorithm that relies on so called suffix tree data structure. Suffix tree is a well known data structure which is commonly used in industrial and scientific applications of pattern matching today. Being a concise representation of a text composed over a finite alphabet, suffix tree, or more general suffix automaton, is a common way to compress large amounts of textual information, and it is widely used also in databases. In our study, we will perform tests of suffix tree base pattern matching algorithm, and compare it against the aforementioned Boyer-More and Aho-Corasick algorithms, trying to get an insight on when should one chose either of these algorithms.\\
 
-Below, we will introduce first \textit{suffix trie} -- an auxillary data structure -- which we will enhance into suffix tree. Along this way, we will show that suffix tree construction algorithm is a linear time algorithm, and that suffix tree is a linear-memory data structure, following the Ukkonen's construction algorithm~\cite{ukkonen1995online}. Suffix tree construction is the preprocessing step for the pattern matching algorithm. We also, describe how to use a suffix tree of a text to find out if a pattern matches the text, and show that procedure also takes pattern length linear time.
+Below, we will introduce first \textit{suffix trie} -- an auxillary data structure -- which we will enhance into suffix tree. Along this way, we will show that suffix tree construction algorithm is a linear time algorithm, and that suffix tree is a linear-memory data structure. We will follow the Ukkonen's construction algorithm~\cite{ukkonen1995line}. Suffix tree construction is the preprocessing step for the pattern matching algorithm, so we will describe how to use a suffix tree of a text to find out if a pattern matches the text, and will show that procedure also takes pattern length linear time.
 
 \subsection{Suffix Trie}
-Being able to consider suffix tries, and following~\cite{ukkonen1995online}, we first introduce the notations. Let text T be a string $T = t_1 t_2 \dots t_n$ over an alphabet $\Sigma$; $T_i = t_i \dots t_n$ where $1 \leq i \leq n+1$ is a suffix of the text; lets also assume that $T_{n+1} = \varepsilon$, i.e. the empty suffix. Lets denote the set of all the suffixes of the text T by $\sigma(T)$. We name the following set of objects a \textit{suffix trie} of a text T
+Being able to consider suffix tries, and following~\cite{ukkonen1995line}, we first introduce the notations. Let text T be a string $T = t_1 t_2 \dots t_n$ over an alphabet $\Sigma$; $T_i = t_i \dots t_n$ where $1 \leq i \leq n+1$ is a suffix of the text; lets also assume that $T_{n+1} = \varepsilon$, i.e. the empty suffix. Lets denote the set of all the suffixes of the text T by $\sigma(T)$. We name the following set of objects a \textit{suffix trie} of a text T
 
 \begin{equation}
 STrie(T) = \left\{Q \cup \{\perp\}, root, F, g, f \right\}
@@ -263,8 +282,9 @@ STrie(T) = \left\{Q \cup \{\perp\}, root, F, g, f \right\}
 
 which is a deterministic finite-state automaton (DFA) which has a tree-shaped transition graph representing the trie for $\sigma(T)$. It is augmented with so called \textit{suffix function} $f$ and with an auxiliary state $\perp$. In the presented notations, the set $Q$ is the set of all the states of $STrie(T)$, which could be put into one-to-one correspondence with the substrings of $T$, i.e. with all such $x$ that $T = a\ x\ v$, where $a$ is some prefix of $T$, and $v$ is some suffix of $T$. The initial state $root$ corresponds to the empty string $\varepsilon$, and the set of final states $F$ corresponds to all the suffixes $\sigma(T)$. Latin characters with bars will denote states; characters without bars will denote symbols or some sequences of symbols from the alphabet $\Sigma$; $\varepsilon$ will denote the empty string. Finally, the transition function $g$ is defined as $g(\bar{x}, a) = \bar{y}$ for all $\bar{x}, \bar{y} \in Q$ such that $y = xa$, where $a \in \Sigma$; $g(\perp, a) = root$ for all $a \in \Sigma$.\\
 
-Now, the suffix function $f$ is defined for each state $\bar{x} \in Q$ as follows. If $\bar{x}$ is not $root$, then $x = az$ for some $a \in \Sigma$, and we set $f(\bar{x}) = \bar{z}$. If it is $root$, $f(root) = \perp$.\\
+Now, the suffix function $f$ is defined for each state $\bar{x} \in Q$ as follows. If $\bar{x}$ is not $root$, then $x = az$ for some $a \in \Sigma$, and we set $f(\bar{x}) = \bar{z}$. If it is $root$, $f(root) = \perp$.
 
+\subsubsection{Suffix Trie Online Construction}
 To online construct a suffix trie by reading a text $T$ from left to right symbol by symbol, we should notice the following. Suppose, we have already read some prefix of the text $T^i = t_1 \dots t_i$, and have already constructed a $STrie(T^i)$. Now, we read the next symbol $t_{i+1}$ from the text, and we need to add it to the structure and obtain $STrie(T^{i+1})$. One can notice, that all the new suffixes of $T^{i+1}$ could be obtained by concatenation of $t_{i+1}$ symbol to all the previous suffixes, i.e.
 
 $$
@@ -273,9 +293,10 @@ $$
 
 By construction, the $STrie(T^i)$ accepts $\sigma(T^i)$, and we want to make it accept $\sigma(T^{i+1})$. For achieving this, we need to add $t_{i+1}$ transitions to all the $r \in F_i$ which don't have such. By doing this, we will properly update our transition function $g_i$ to $g_{i+1}$, and also we will get final states $F_i$ updated to $F_{i+1}$.\\
 
-Also, we should update the suffix function $f_i$ up to $f_{i+1}$, such that for every $\bar{r} \in F_{i+1}$ the new suffix function $f_{i+1}(\bar{r}) = \bar{s}$, for which $r = as$, where $a \in \Sigma$. In order to do such an update, we notice that if $r \in F_i$, then there exists such $0 \le j \le i$, such that $r = f_i^j(\overline{t_1...t_i})$. This means that the suffix function connects all the final states in the $STrie(F_i)$ into a single path. We denote this path as the \textit{boundary path}.\\
+Also, we should update the suffix function $f_i$ up to $f_{i+1}$, such that for every $\bar{r} \in F_{i+1}$ the new suffix function $f_{i+1}(\bar{r}) = \bar{s}$, for which $r = as$, where $a \in \Sigma$. In order to do such an update, we notice that if $r \in F_i$, then there exists such $0 \le j \le i$, such that $r = f_i^j(\overline{t_1...t_i})$. This means that the suffix function connects all the final states in the $STrie(F_i)$ into a single path. We denote this path as the \textit{boundary path}.
 
-So, the new suffix function $f_{i+1}$ should connect all the new final states $F_{i+1}$ and form a new boundary path. To achieve this, we can traverse all the $F_i$ states along the current boundary path, and make updates for every state on this path, adding a suffix link where it is necessary and adding a transition for a new symbol $t_{i+1}$ where it is necessary. Finally, it was shown in the original paper~\cite{ukkonen1995online} that while traversing the boundary path, if we encountered a state $\bar{z}$ that does have a transition $t_{i+1}$, there is no need to further continue traversing, since all of the further suffix successors of the state $\bar{z}$ are up-to-date and have both the right suffix links and also the right transitions $t_{i+1}$. Finally, the algorithm is going to be as it follows.
+\subsubsection{Suffix Trie Analysis}
+So, the new suffix function $f_{i+1}$ should connect all the new final states $F_{i+1}$ and form a new boundary path. To achieve this, we can traverse all the $F_i$ states along the current boundary path, and make updates for every state on this path, adding a suffix link where it is necessary and adding a transition for a new symbol $t_{i+1}$ where it is necessary. Finally, it was shown in the original paper~\cite{ukkonen1995line} that while traversing the boundary path, if we encountered a state $\bar{z}$ that does have a transition $t_{i+1}$, there is no need to further continue traversing, since all of the further suffix successors of the state $\bar{z}$ are up-to-date and have both the right suffix links and also the right transitions $t_{i+1}$. Finally, the algorithm is going to be as it follows.
 
 \begin{enumerate}
   \item Start from the state $\overline{t_1 t_2 \dots t_i}$ (the whole prefix preprocessed up to now).
@@ -295,29 +316,40 @@ So, the new suffix function $f_{i+1}$ should connect all the new final states $F
 An example of how this algorithm works is presented in figure~\ref{fig:siffix-trie}. The algorithm obviously does a constant number of operations each of its iterations, and, in the worst case, it should visit all the nodes of the suffix trie $STrie(T^i)$ to update it up to $STrie(T^{i+1})$. So, it is optimal in the sense that its time complexity is proportional to the size of its end result $STrie(T)$. On the other hand, the size of $STrie(T)$ can be quadratic in $n = |T|$. To overcome this issue, we introduce the so called \textit{suffix tree} structure which is based on suffix trie, but is more concise and takes less memory and time to be built.
 
 \subsection{Suffix Tree}
+In order to introduce suffix tree structure, first, we reduce the set of states $Q \cup \{\perp\}$ described above to the set $Q' \cup \{\perp\}$ -- the set of so called \textit{explicit states} -- which includes only the \textit{branching states} -- the states that have two or more children, i.e. from which there are two or more transitions -- and the \textit{leaves} -- the states that don't have any transitions. The other states $Q \ Q'$ are called \textit{implicit}. By definition, we also include $root$ state into the set of explicit states $Q'$ regardless its branching.\\
 
-The suffix tree for the string $S$ of length $n$ is defined as a tree such that:
-\begin{itemize}
-  \item The tree has exactly $n$ leaves numbered from 1 to $n$.
-  \item Except for the root, every internal node has at least two children.
-  \item Each edge is labeled with a non-empty substring of $S$.
-  \item No two edges starting out of a node can have string-labels beginning with the same character.
-  \item  The string obtained by concatenating all the string-labels found on the path from the root to leaf $i$ spells out suffix $S[i..n]$, for $i$ from 1 to n.
-\end{itemize}
+Since we reduced the set $Q$ to $Q'$, if we want to go from one explicit state to another, we have to spell out not only one symbol, but, in general, a substring $w$ of the text $T$. So, second, we have to generalize the transition function. The new function $g'$ will take as arguments an explicit state and a substring $w$, and it will return another explicit state: $g'(\bar{r}, w) = \bar{s}$. To save memory, we also will represent substrings $w$ as two pointers to $T$: left pointer $k$ and right pointer $p$. So, the new transition function can be written as $g'(\bar{r},(k,p)) = \bar{s}$.\\
 
-\subsection{definitions of some notations}
-For a text, let $T = t_1t_2...t_3$ be a string over an alphabet $\Sigma$. And each string $T_i = t_it_{i+1}...t_n$ where $1 \leq i \leq n+1$ is a $suffix$ of string $T$. In particular, $T_{n+1} = \varepsilon$ is the $empty$ suffix. We define suffix tree $STree(T)$ of $T$ to be a data structure that represents $STre(T)$ in space linear in the length $|T|$ of $T$. And we denote it as $STree(T) =$
-$(Q^{'}$
-$\cup$
-$\{\bot\},$
-$root, g^{'}, f^{'})$.Set $Q^{'}$ consists of all branching states (states from which there
-are at least two transitions) and all leaves (states from which there are no transitions) of $STrie(T)$. By definition, $root$ is included in the branching states.
-The other states of $STrie(T)$ (the states other than $root$ and $\bot$ from which
-there is exactly one transition) are called implicit states as states of $STree(T)$; they
-are not explicitly present in $STree(T)$. Here $\bot$ is an auxiliary state.
+Finally, we need to introduce a new suffix function compatible with the set $Q'$ of only explicit states. So, we say that the new suffix function $f'$ is defined for all the explicit states, and it returns an explicit state: $f'(\bar{x}) = \bar{y}$, such that $x = ay$, where $a \in \Sigma$ \footnote{If $\bar{x}$ is an explicit state, then $f'(\bar{x})$ is explicit too, since they share the same suffixes, and hence the same transitions.}.\\
+
+Now, we denote the following structure as suffix tree:
+
+\begin{equation}
+STree(T) = \left\{ Q' \cup \{\perp\}, root, g', f' \right\}.
+\end{equation}
+
+\subsubsection{Suffix Tree Analysis}
+Suffix tree has two components: the tree itself and the string $T$. It is of linear size in $n \equiv |T|$ because $Q'$ has at most $n$ leaves (at most one leaf for each non-empty suffix), and therefore $Q'$ has to contain at most $n - 1$ branching states (when $n > 1$) \footnote{To understand that a tree with branching factor $b >= 2$ and with $n$ leafs, has the total number of nodes equal to $O(n)$, we can see that the number of all the nodes can be upper bounded with $1 + 2 + 2^2 + \dots + 2^d$, where $d = \log_2n$, and hence the number of nodes will be $O(n)$. If we do a little more strict derivations, we can show that in fact the number of all the leafs in such a tree is upper bounded by $2n - 1$, where $n$ is the number of leaves.}. Now, since the alphabet is finite, the number of transitions will be also bounded, and it will be in our case equal to $O(n)$. The number of suffix links we have to store will be less than or equal to the number of all the explicit states, i.e. $O(n)$. So, this proves that the constructed suffix tree is a linear in memory data structure.
+
+\subsubsection{Suffix Tree Online Construction Algorithm}
+This part is the most complex part. Finally, we need to enhance the proposed above algorithm for a suffix trie construction to make it construct a suffix tree. Again, we are following the original paper~\cite{ukkonen1995line}, and we will skip some of the minor steps of the derivations to keep our explanation as brief as it is possible.\\
+
+First, we need to introduce some additional notations, and a lemma without a proof (the proof is essential and completely based on considering two different cases of the algorithm for an $STrie$ construction).
+
+\begin{lemma}
+\label{lemma:active-end-point}
+Algorithm 1 adds to $STrie( T^i)$ a $t_{i+1}$-transition for each of the states $\bar{s}_h$,
+$1 < h < j'$, such that, for $1 < h < j$, the new transition expands an old branch of
+the trie that ends at leaf $\bar{s}_h$, and, for $j < h < j'$, the new transition initiates a new branch from $\bar{s}_h$. Algorithm 1 does not create any other transitions.
+\end{lemma}
+
+Further, we call the state $\bar{s}_j$ the \textit{active point} and the state $\bar{s}_{j'}$ the \textit{end point} of $STrie(T^i)$. According to this lemma, there are two important segments of the boundary path: the segment in which we add new transitions to the traversed leaves ($1 < h < j'$, right before active point), and the segment in which we split the states and increase their branching factor ($j < h < j'$, between the active point and the end point).\\
+
+Going back to $STree(T^i)$, the both updates mentioned in lemma~\ref{lemma:active-end-point}, could be represented as following. For the updates with no splits we can just update the transition, adding $t_{i+1}$ symbol: For example we have a transition to a leaf (we also call it an \textit{open transition}) $g'(\bar{s}, (k, i)) = \bar{r}$ where the pointer $i$ points to the last symbol of the previous text prefix $T^i$. So, in this case we need to update the transition and make it $g'(\bar{s}, (k, i+1)) = \bar{r}$. Now, again, the right pointer $i+1$ now points right to the end of the current text prefix $T^{i+1}$. We can use this property and all the leaf transitions we can represent as $g'(\bar{s}, (k, \infty)) = \bar{r}$, denoting the pointer to the last symbol of the current prefix as $\infty$. Such notation makes us do nothing to update all the states in $STree(T^{i+1})$ for all the states $s_h$ before the active point ($1 < h < j'$).
+
+
 
 \newpage
-
 \section{Dataset}
 We will apply these algorithms on an available dataset of DNA sequences and natural language text, to find specific sequence motifs in the first, and words and phrases in the latter. With regards to the biological dataset, we selected  the DNA sequence of  human chromosome 1 in fasta format as a searching test. The DNA alphabet consists of four elements, $\Sigma$ = \{A, C, G, T\}, that represent  the four nitrogenous bases. We also chose three different patterns for our experimental measurements. As for the natural language data set, we will search for specific phrases of varying lengths. We will compare the performance in the two data sets to highlight the effect of the size of the alphabet and pattern length.
 Applying the algorithms on these datasets will show practical results on the analytical complexities that we examined and the difference in performance of the three above mentioned algorithms on the tested domains of application.
@@ -341,6 +373,6 @@ When the alphabet in $|\Sigma|$ has a single character, the term $z$ in Aho Cora
 
 \newpage
 \bibliography{references}
-\nocite{*}
+%\nocite{*}
 
 \end{document}
