@@ -21,6 +21,7 @@
 *.snm
 *.synctex.gz
 *.toc
+*.blg
 *.bbl
 
 # Other files
