@@ -1,5 +1,5 @@
 /******************************************************************************
- * Suffix tree based pattern matching algorithm implementation
+ * Suffix tree implementation
  *
  * Copyright 2013, Maruan Al-Shedivat
  ******************************************************************************/
@@ -7,61 +7,15 @@
 #include <string>
 #include <vector>
 
+#include "suffix_tree.h"
+
 using std::string;
 using std::vector;
 using std::cin;
 using std::cout;
 using std::endl;
 
-/******************************************************************************
- * i/o functions
- ******************************************************************************/
-void Input(string* input_string) {
-  cin >> *input_string;
-}
-
-void Output(const vector<size_t>& result) {
-  for (size_t pos = 0; pos < result.size(); ++pos) {
-    cout << result[pos] << endl;
-  }
-}
-
-/******************************************************************************
- * The Visitor pattern class
- * Calculates the max length of common prefixes for each first k suffixes
- * during Ukkonen's suffix tree building.
- ******************************************************************************/
-class Visitor {
- public:
-  virtual void VisitOnInsert(size_t, size_t, char) = 0;
-  virtual void VisitOnSplit(size_t, size_t) = 0;
-  virtual ~Visitor()
-  {}
-};
-
-class MaxLengthOfCommonPrefixesVisitor: public Visitor {
- public:
-  explicit MaxLengthOfCommonPrefixesVisitor(const string& str)
-      : common_prefixes_max_length(str.length(), 0)
-  {}
-
-  void VisitOnInsert(size_t depth, size_t pos, char inserted_char) {
-    if (pos < common_prefixes_max_length.size()) {
-      common_prefixes_max_length[pos] = depth;
-    }
-  }
-
-  void VisitOnSplit(size_t depth, size_t pos) {
-    common_prefixes_max_length[pos] = depth;
-  }
-
-  const vector<size_t>& get_common_prefixes_max_length() const {
-    return common_prefixes_max_length;
-  }
-
- private:
-  vector<size_t> common_prefixes_max_length;
-};
+namespace suffixtree {
 
 /******************************************************************************
  * Suffix Tree implementation
@@ -90,120 +44,18 @@ class MaxLengthOfCommonPrefixesVisitor: public Visitor {
  *       question http://stackoverflow.com/questions/9452701/ and then some
  *       mistakes were corrected.
  ******************************************************************************/
-class SuffixTree {
- public:
-  explicit SuffixTree(const string& str)
-      : the_string(str)
-  {
-    CanonizeCharacters();
-  }
-
-  void Build(Visitor* visitor);
-
- private:
-  static const size_t ALPHABET_SIZE = 26;   // we use latin lowercase alphabet
-  static const char FIRST_ALPHABET_CHARACTER = 'a';
-  static const char SENTINEL_SIGN = static_cast<char>(ALPHABET_SIZE);
-
-  class Node;
-  class Edge;
-  class ActivePoint;
-
-  class Node {
-   public:
-    size_t depth;
-    Node* suffix_link;
-    vector<Edge> edges;
-
-    explicit Node(size_t node_depth)
-        : depth(node_depth)
-        , suffix_link(NULL)
-        , edges(ALPHABET_SIZE + 1)  // +1 for SENTINEL_SIGN!
-    {}
-  };
-
-  class Edge {
-   public:
-    size_t from;
-    size_t to;
-    Node* tail;
-    bool exists;    // flag of edge existance
-
-    Edge()
-        : exists(false)
-    {}
-
-    void Assign(size_t from_index, size_t to_index, Node* node_to_point) {
-      from = from_index;
-      to = to_index;
-      tail = node_to_point;
-      exists = true;
-    }
-
-    // NOTE: the length is not the real Length as we usually understand,
-    //       but it's the Length - 1, because the segment of the_string
-    //       on the edge is presented by [from, to], NOT [from, to)!
-    size_t length()  const {
-      return to - from;   // to >= from according to the logic of the algorithm
-    }
-  };
-
-  class ActivePoint {
-   public:
-    Node* node;
-    Edge* edge;
-    size_t length;
-
-    ActivePoint()
-        : node(NULL)
-        , edge(NULL)
-        , length(0)
-    {}
-    
-    bool isExplicit() const {
-      return length == 0;
-    }
-  };
-
-  string the_string;
-  vector<Node> nodes;
-  Node* ROOT;
-
-  ActivePoint active;
-  size_t  unresolved_suffixes;
-  size_t  current_suffix_start_index;
-  size_t  current_suffix_end_index;
-  char    current_suffix_last_char;
-
-  Node* last_created_node_in_current_iteration;
-
-  void CanonizeCharacters();
-  void InsertEdge();
-  void SplitEdge();
-  bool AddSuffixImplicitly();
-  bool NormalizeActivePoint();
-  void UpdateActivePointAfterEdgeSplitting();
-  void CreateSuffixLink(Node* node);
-};
-
-/******************************************************************************
- * SuffixTree internal methods and classes implementation
- ******************************************************************************/
 // Just replace all the characters with their number in the alphabet
 // and add '$' to the end of the string
 void SuffixTree::CanonizeCharacters() {
-  for (size_t pos = 0; pos < the_string.length(); ++pos) {
-    the_string[pos] -= FIRST_ALPHABET_CHARACTER;
-  }
+  for (size_t pos = 0; pos < the_string.length(); ++pos)
+    the_string[pos] -= FIRST_ALPHABET_CHARACTER;  // conver character into ind
   the_string += SENTINEL_SIGN;
 }
 
 void SuffixTree::Build(Visitor* visitor) {
   // We know that suffix tree will contain n nodes in total without leafs.
   // And we have to prevent the reallocations! Otherwise it will kill all
-  // the pointers to the Nodes.So I chose to reserve 2*n memory spase.
-  //
-  // Another approach is to use list<Node>, but Michael doesn't like lists :)
+  // the pointers to the Nodes. So I chose to reserve 2*n memory spase.
   nodes.reserve(2 * the_string.length());
 
   // Init nodes and active point
@@ -362,12 +214,28 @@ void SuffixTree::UpdateActivePointAfterEdgeSplitting() {
   }
 }
 
+}  // namespace suffixtree
+
+
+/******************************************************************************
+ * I/O functions
+ ******************************************************************************/
+void Input(string* input_string) {
+  cin >> *input_string;
+}
+
+void Output(const vector<size_t>& result) {
+  for (size_t pos = 0; pos < result.size(); ++pos) {
+    cout << result[pos] << endl;
+  }
+}
+
 int main() {
   string input_string;
   Input(&input_string);
 
-  MaxLengthOfCommonPrefixesVisitor visitor(input_string);
-  SuffixTree suffix_tree(input_string);
+  suffixtree::MaxLengthOfCommonPrefixesVisitor visitor(input_string);
+  suffixtree::SuffixTree suffix_tree(input_string);
   suffix_tree.Build(&visitor);
 
   Output(visitor.get_common_prefixes_max_length());
