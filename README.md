@@ -23,5 +23,5 @@ In this project we analyse and compare performances of the following three exact
 * Measure performances of the algorithms on the test sets under exactly the same conditions for each of the algorithms (on the same machine). [**deadline: November 27-28**]
 * Plot the graphs and write up the final analysys. [**deadline: November 28-29**]
 * Create presentation slides for delivering our results. [**deadline: December 1**]
-* Write up the final report. [**deadline: November December 4**]
+* Write up the final report. [**deadline: December 4**]
 
