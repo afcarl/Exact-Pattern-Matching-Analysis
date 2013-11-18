@@ -396,6 +396,8 @@ As it was shown above, algorithm takes linear time to preprocess the text and bu
 \section{Dataset}
 \par We will apply these algorithms on an available dataset of DNA sequences and natural language text, to find specific sequence motifs in the former, and words and phrases in the latter. With regards to the biological dataset, we selected the DNA sequence of human chromosome 1 in fasta format as a searching test. The DNA alphabet consists of four elements, $\Sigma = \{A,\ C,\ G,\ T\}$, that represent  the four nitrogenous bases. We also chose three different patterns for our experimental measurements. As for the natural language data set, we will search for specific phrases of varying lengths. We will compare the performance in the two data sets to highlight the effect of the size of the alphabet and pattern length. Applying the algorithms on these datasets will show practical results on the analytical complexities that we examined and the difference in performance of the three above mentioned algorithms on the tested domains of application.
 
+In order to observe the effect of parameters n and k in runtime complexity, we vary each parameter while other parameters are fixed. This is applied to both text and the pattern. We fixed the length of text n and vary the length of pattern k from 1 to 100.   
+
 \section{Discussion}
 \par Each algorithm has a one time preprocessing cost. Aho-Corasick algorithm has linear search cost to the length of the input text and the occurrences of the patterns in the input text. When the alphabet in $|\Sigma|$ has a single character, the term $z$ in Aho-Corasick grows similarly to the sum of running time of applying Na\"ive Search on each pattern in the pattern set, which will be $k\times n$, resulting in the worst case running time for Aho-Corasick. However, such a small alphabet has a positive effect on Boyer-Moore, resulting in a smaller preprocessing time.
 
@@ -411,7 +413,7 @@ As it was shown above, algorithm takes linear time to preprocess the text and bu
 	\hline
 	Pre-processing & $O(|\Sigma|)$ & $O(k)$ & $O(n)$ \\
 	\hline
-	Searching & $O(k\times m)$ & $O(n + z)$ & $O(k + z)$ \\
+	Searching & $O(k\times n)$ & $O(n + z)$ & $O(k + z)$ \\
 	\hline
 \end{tabular}
 \caption{Comparative table of preprocessing and searching time complexities.}
