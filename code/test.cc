@@ -6,19 +6,23 @@
 #include <iostream>
 #include <string>
 #include <vector>
-// to include our algorithms files
+#include "suffix_tree.h"
 
 using std::cout;
 using std::endl;
+using std::string;
 
 const int kTestNum = 3;   // Number of tests to perform
 typedef bool (*Test) ();  // pointer to a test function
 
 bool test1() {
-  // Dummy function body
-  cout << "Performed test1!" << endl;
-  // ...
-  return true;
+  string text = "abbabababa";
+  string pattern = "aba";
+  suffixtree::SuffixTree st(text);
+  st.Build();
+  int match = st.Match(pattern);
+
+  return (match >= 0);
 }
 
 bool test2() {

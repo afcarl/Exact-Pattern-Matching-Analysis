@@ -12,47 +12,6 @@ using std::endl;
 
 namespace suffixtree {
 
-/******************************************************************************
- * The Visitor class (not sure whether we need this)
- * Calculates the max length of common prefixes for each first k suffixes
- * during Ukkonen's suffix tree building.
- ******************************************************************************/
-class Visitor {
- public:
-  virtual void VisitOnInsert(size_t, size_t, char) = 0;
-  virtual void VisitOnSplit(size_t, size_t) = 0;
-  virtual ~Visitor()
-  {}
-};
-
-class MaxLengthOfCommonPrefixesVisitor: public Visitor {
- public:
-  explicit MaxLengthOfCommonPrefixesVisitor(const string& str)
-      : common_prefixes_max_length(str.length(), 0)
-  {}
-
-  void VisitOnInsert(size_t depth, size_t pos, char inserted_char) {
-    if (pos < common_prefixes_max_length.size()) {
-      common_prefixes_max_length[pos] = depth;
-    }
-  }
-
-  void VisitOnSplit(size_t depth, size_t pos) {
-    common_prefixes_max_length[pos] = depth;
-  }
-
-  const vector<size_t>& get_common_prefixes_max_length() const {
-    return common_prefixes_max_length;
-  }
-
- private:
-  vector<size_t> common_prefixes_max_length;
-};
-
-
-/******************************************************************************
- * Suffix Tree implementation
- ******************************************************************************/
 class SuffixTree {
  public:
   explicit SuffixTree(const string& str)
@@ -61,7 +20,9 @@ class SuffixTree {
     CanonizeCharacters();
   }
 
-  void Build(Visitor* visitor);
+  void Build();
+
+  int Match(string pattern);
 
  private:
   static const size_t ALPHABET_SIZE = 26;   // we use latin lowercase alphabet
@@ -143,6 +104,8 @@ class SuffixTree {
   bool NormalizeActivePoint();
   void UpdateActivePointAfterEdgeSplitting();
   void CreateSuffixLink(Node* node);
+
+  const Edge* ChooseEdge(char c, const Node& node);
 };
 
 }  // namespace suffixtree

@@ -1,0 +1,3 @@
+pattern,frequences
+AAC,7507
+GGCCAATCT,0

@@ -52,7 +52,7 @@ void SuffixTree::CanonizeCharacters() {
   the_string += SENTINEL_SIGN;
 }
 
-void SuffixTree::Build(Visitor* visitor) {
+void SuffixTree::Build() {
   // We know that suffix tree will contain n nodes in total without leafs.
   // And we have to prevent the reallocations! Otherwise it will kill all
   // the pointers to the Nodes. So I chose to reserve 2*n memory spase.
@@ -78,15 +78,10 @@ void SuffixTree::Build(Visitor* visitor) {
 
       if (active.isExplicit()) {
         if (!active.node->edges[current_suffix_last_char].exists) {
-          // If visitor exists, let's perform a visit action on edge insertion
-          if (visitor) visitor->VisitOnInsert(active.node->depth,
-                                              current_suffix_start_index,
-                                              current_suffix_last_char);
-          
           // Insert a new edge, there is no such
           InsertEdge();
         } else {
-          // if such edge exists we make it active and add suffix implicitly
+          // If such edge exists we make it active and add suffix implicitly
           active.edge = &active.node->edges[current_suffix_last_char];
           AddSuffixImplicitly();
           break;
@@ -96,17 +91,12 @@ void SuffixTree::Build(Visitor* visitor) {
             the_string[active.edge->from + active.length]) {
           // if the active point was implicit and next characters coincided
           bool active_point_was_updated = AddSuffixImplicitly();
-          if (active_point_was_updated) {
+          if (active_point_was_updated)
             CreateSuffixLink(active.node);
-          }
           break;
         } else {
           // if the next characters not coincided -> split the edge
           SplitEdge();
-
-          // If visitor exists, let's perform a visit on edge split
-          if (visitor) visitor->VisitOnSplit(active.edge->tail->depth,
-                                             current_suffix_start_index);
 
           // Update active point after splitting
           UpdateActivePointAfterEdgeSplitting();
@@ -143,12 +133,11 @@ bool SuffixTree::NormalizeActivePoint() {
 // to the given node.
 void SuffixTree::CreateSuffixLink(Node* node) {
   if (last_created_node_in_current_iteration &&
-      last_created_node_in_current_iteration != active.node) {
+      last_created_node_in_current_iteration != active.node)
     last_created_node_in_current_iteration->suffix_link = node;
-  }
 }
 
-// Insert a new edge from explicit position
+// Insert a new edge from an explicit position
 void SuffixTree::InsertEdge() {
   active.node->edges[current_suffix_last_char].Assign(current_suffix_end_index,
                                                       the_string.length(),
@@ -209,36 +198,52 @@ void SuffixTree::UpdateActivePointAfterEdgeSplitting() {
   // After all we don't forget to normalize the active point if any...
   // and to create a suffix link if the active node changes.
   bool active_point_was_updated = NormalizeActivePoint();
-  if (active_point_was_updated) {
+  if (active_point_was_updated)
     CreateSuffixLink(active.node);
+}
+
+int SuffixTree::Match(string pattern) {
+  // Canonize the pattern
+  for (size_t i = 0; i < pattern.size(); ++i)
+    pattern[i] -= FIRST_ALPHABET_CHARACTER;
+
+  Node* current_node = ROOT;
+  const Edge* current_edge = NULL;
+  size_t edge_ind = 0;
+  for (size_t i = 0; i < pattern.size(); ++i) {
+    if (!current_edge)
+      current_edge = ChooseEdge(pattern[i], *current_node);
+
+    if (!current_edge) {
+      cout << "HERE1" << endl;
+      return -1;
+    } else {
+      if (pattern[i] == the_string[current_edge->from + edge_ind]) {
+        ++edge_ind;
+      } else {
+        cout << "HERE2" << endl;
+        return -1;
+      }
+      if (current_edge->from + edge_ind > current_edge->to) {
+        current_node = current_edge->tail;
+        edge_ind = 0;
+      }
+    }
   }
+  
+  return 0;
+}
+
+const SuffixTree::Edge* SuffixTree::ChooseEdge(char c, const Node& node) {
+  const Edge* edge_p = NULL;
+  for (size_t i = 0; i < node.edges.size(); ++i) {
+    if (the_string[node.edges[i].from] == c) {
+      edge_p = &node.edges[i];
+      break;
+    }
+  }
+  return edge_p;
 }
 
 }  // namespace suffixtree
-
-
-/******************************************************************************
- * I/O functions
- ******************************************************************************/
-void Input(string* input_string) {
-  cin >> *input_string;
-}
-
-void Output(const vector<size_t>& result) {
-  for (size_t pos = 0; pos < result.size(); ++pos) {
-    cout << result[pos] << endl;
-  }
-}
-
-int main() {
-  string input_string;
-  Input(&input_string);
-
-  suffixtree::MaxLengthOfCommonPrefixesVisitor visitor(input_string);
-  suffixtree::SuffixTree suffix_tree(input_string);
-  suffix_tree.Build(&visitor);
-
-  Output(visitor.get_common_prefixes_max_length());
-  return 0;
-}
 

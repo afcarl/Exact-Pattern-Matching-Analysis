@@ -1,0 +1,3 @@
+pattern,frequency
+the,4514
+yellow,1
