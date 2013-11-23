@@ -1,4 +1,11 @@
-using namespace std;
+/*
+ * Original Code from https://gist.github.com/andmej/1233426
+ * written by Andrés Mejía
+ * Adjustments:
+ * - Changed MAXC from 26 to 90 to include special and
+ * upper case characters (and SPACE) in the alphabet
+ * - Changed lowestChar from 'a' to ' ' highestChar from 'z' to '~'
+ */
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -19,7 +26,7 @@ using namespace std;
 #include <list>
 #include <map>
 #include <set>
-
+using namespace std;
 #define foreach(x, v) for (typeof (v).begin() x=(v).begin(); x !=(v).end(); ++x)
 #define For(i, a, b) for (int i=(a); i<(b); ++i)
 #define D(x) cout << #x " is " << x << endl
@@ -28,37 +35,38 @@ using namespace std;
 // Aho-Corasick's algorithm, as explained in  http://dx.doi.org/10.1145/360825.360855  //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-const int MAXS = 6 * 50 + 10; // Max number of states in the matching machine.
-                              // Should be equal to the sum of the length of all keywords.
+const int MAXS = 6 * 50 + 10 + 2; // Max number of states in the matching machine.
+// Should be equal to the sum of the length of all keywords.
 
-const int MAXC = 26; // Number of characters in the alphabet.
+const int MAXC = 90;// Number of characters in the alphabet.
+
 
 int out[MAXS]; // Output for each state, as a bitwise mask.
-               // Bit i in this mask is on if the keyword with index i appears when the
-               // machine enters this state.
+// Bit i in this mask is on if the keyword with index i appears when the
+// machine enters this state.
 
 // Used internally in the algorithm.
 int f[MAXS]; // Failure function
 int g[MAXS][MAXC]; // Goto function, or -1 if fail.
 
 // Builds the string matching machine.
-// 
+//
 // words - Vector of keywords. The index of each keyword is important:
 //         "out[state] & (1 << i)" is > 0 if we just found word[i] in the text.
-// lowestChar - The lowest char in the alphabet. Defaults to 'a'.
-// highestChar - The highest char in the alphabet. Defaults to 'z'.
+// lowestChar - The lowest char in the alphabet. Defaults to ' '.
+// highestChar - The highest char in the alphabet. Defaults to '~'.
 //               "highestChar - lowestChar" must be <= MAXC, otherwise we will
 //               access the g matrix outside its bounds and things will go wrong.
 //
-// Returns the number of states that the new machine has. 
+// Returns the number of states that the new machine has.
 // States are numbered 0 up to the return value - 1, inclusive.
-int buildMatchingMachine(const vector<string> &words, char lowestChar = 'a', char highestChar = 'z') {
+int buildMatchingMachine(const vector<string> &words, char lowestChar = ' ', char highestChar = '~') {
     memset(out, 0, sizeof out);
     memset(f, -1, sizeof f);
     memset(g, -1, sizeof g);
     
     int states = 1; // Initially, we just have the 0 state
-        
+    
     for (int i = 0; i < words.size(); ++i) {
         const string &keyword = words[i];
         int currentState = 0;
@@ -78,7 +86,7 @@ int buildMatchingMachine(const vector<string> &words, char lowestChar = 'a', cha
             g[0][c] = 0;
         }
     }
-
+    
     // Now, let's build the failure function
     queue<int> q;
     for (int c = 0; c <= highestChar - lowestChar; ++c) {  // Iterate over every possible input
@@ -104,7 +112,7 @@ int buildMatchingMachine(const vector<string> &words, char lowestChar = 'a', cha
             }
         }
     }
-
+    
     return states;
 }
 
@@ -112,13 +120,13 @@ int buildMatchingMachine(const vector<string> &words, char lowestChar = 'a', cha
 //
 // currentState - The current state of the machine. Must be between
 //                0 and the number of states - 1, inclusive.
-// nextInput - The next character that enters into the machine. Should be between lowestChar 
+// nextInput - The next character that enters into the machine. Should be between lowestChar
 //             and highestChar, inclusive.
 // lowestChar - Should be the same lowestChar that was passed to "buildMatchingMachine".
 
 // Returns the next state the machine will transition to. This is an integer between
 // 0 and the number of states - 1, inclusive.
-int findNextState(int currentState, char nextInput, char lowestChar = 'a') {
+int findNextState(int currentState, char nextInput, char lowestChar = ' ') {
     int answer = currentState;
     int c = nextInput - lowestChar;
     while (g[answer][c] == -1) answer = f[answer];
@@ -127,7 +135,7 @@ int findNextState(int currentState, char nextInput, char lowestChar = 'a') {
 
 
 // How to use this algorithm:
-// 
+//
 // 1. Modify the MAXS and MAXC constants as appropriate.
 // 2. Call buildMatchingMachine with the set of keywords to search for.
 // 3. Start at state 0. Call findNextState to incrementally transition between states.
@@ -135,15 +143,15 @@ int findNextState(int currentState, char nextInput, char lowestChar = 'a') {
 //
 // Example:
 //
-// Assume keywords is a vector that contains {"he", "she", "hers", "his"} and text is a string
+// Assume keywords is a vector that contains {"Hey!", "she", "hers", "his"} and text is a string
 // that contains "ahishers".
 //
 // Consider this program:
 //
-// buildMatchingMachine(v, 'a', 'z');
+// buildMatchingMachine(v, ' ', '~');
 // int currentState = 0;
 // for (int i = 0; i < text.size(); ++i) {
-//    currentState = findNextState(currentState, text[i], 'a');
+//    currentState = findNextState(currentState, text[i], ' ');
 //    if (out[currentState] == 0) continue; // Nothing new, let's move on to the next character.
 //    for (int j = 0; j < keywords.size(); ++j) {
 //        if (out[currentState] & (1 << j)) { // Matched keywords[j]
@@ -155,10 +163,10 @@ int findNextState(int currentState, char nextInput, char lowestChar = 'a') {
 //
 // The output of this program is:
 //
-// Keyword his appears from 1 to 3
-// Keyword he appears from 4 to 5
-// Keyword she appears from 3 to 5
-// Keyword hers appears from 4 to 7
+//Keyword Hey! appears from 0 to 3
+//Keyword his appears from 4 to 6
+//Keyword she appears from 6 to 8
+//Keyword hers appears from 7 to 10
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //                          End of Aho-Corasick's algorithm.                           //
@@ -167,24 +175,25 @@ int findNextState(int currentState, char nextInput, char lowestChar = 'a') {
 
 int main(){
     vector<string> keywords;
-    keywords.push_back("where");
-    string text = "tobespecifiedwheretoobtainitfrom";
+    keywords.push_back("Hey!");
+    keywords.push_back("she");
+    keywords.push_back("hers");
+    keywords.push_back("his");
+    string text = "Hey!hishers";
     
-    buildMatchingMachine(keywords, 'a', 'z');
+    buildMatchingMachine(keywords, ' ', '~');
     int currentState = 0;
-    int occurrances = 0;
     for (int i = 0; i < text.size(); ++i) {
-       currentState = findNextState(currentState, text[i], 'a');
-       if (out[currentState] == 0) continue; // Nothing new, let's move on to the next character.
-       for (int j = 0; j < keywords.size(); ++j) {
-           if (out[currentState] & (1 << j)) { // Matched keywords[j]
-             occurrances++;  
-	     //cout << "Keyword " << keywords[j] << " appears from "
-             //       << i - keywords[j].size() + 1 << " to " << i << endl;
-           }
-       }
-   }
-    cout << "Keyword appeared: " << occurrances  << endl;  
-   return 0;
-   
+        currentState = findNextState(currentState, text[i], ' ');
+        if (out[currentState] == 0) continue; // Nothing new, let's move on to the next character.
+        for (int j = 0; j < keywords.size(); ++j) {
+            if (out[currentState] & (1 << j)) { // Matched keywords[j]
+                cout << "Keyword " << keywords[j] << " appears from "
+                << i - keywords[j].size() + 1 << " to " << i << endl;
+            }
+        }
+    }
+    
+    return 0;
+    
 }
