@@ -1,10 +1,13 @@
 /*
- * Original Code from https://gist.github.com/andmej/1233426
+ * Code from https://gist.github.com/andmej/1233426
  * written by Andrés Mejía
  * Adjustments:
+ * - Changed MAXS from 6 * 50 + 10 to 1000
  * - Changed MAXC from 26 to 90 to include special and
  * upper case characters (and SPACE) in the alphabet
+ * (Used ASCII table in http://www.asciitable.com )
  * - Changed lowestChar from 'a' to ' ' highestChar from 'z' to '~'
+ *
  */
 #include <algorithm>
 #include <iostream>
@@ -35,11 +38,11 @@ using namespace std;
 // Aho-Corasick's algorithm, as explained in  http://dx.doi.org/10.1145/360825.360855  //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-const int MAXS = 6 * 50 + 10 + 2; // Max number of states in the matching machine.
+const int MAXS = 1000; //6 * 50 + 10; // Max number of states in the matching machine.
 // Should be equal to the sum of the length of all keywords.
 
 const int MAXC = 90;// Number of characters in the alphabet.
-
+//change MAXC to include special and upper case characters
 
 int out[MAXS]; // Output for each state, as a bitwise mask.
 // Bit i in this mask is on if the keyword with index i appears when the
@@ -148,6 +151,11 @@ int findNextState(int currentState, char nextInput, char lowestChar = ' ') {
 //
 // Consider this program:
 //
+// keywords.push_back("Hey!");
+// keywords.push_back("she");
+// keywords.push_back("hers");
+// keywords.push_back("his");
+// string text = "Hey!hishers";
 // buildMatchingMachine(v, ' ', '~');
 // int currentState = 0;
 // for (int i = 0; i < text.size(); ++i) {
@@ -173,14 +181,20 @@ int findNextState(int currentState, char nextInput, char lowestChar = ' ') {
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
-int main(){
-    vector<string> keywords;
-    keywords.push_back("Hey!");
-    keywords.push_back("she");
-    keywords.push_back("hers");
-    keywords.push_back("his");
-    string text = "Hey!hishers";
+int main(int argc, char * argv[]){
+    // pass in the filename of the text first
+    // pass in the filename of the pattern second
     
+    if (argc != 3) {
+        cout <<argc <<"Please input the arguements in the following order:<function> <pattern> <text>"<<endl;
+        return -1;
+    }
+    //the search is case-sensative (cake will not match Cake).
+    string pattern = argv[1];
+    vector<string> keywords;
+    keywords.push_back(pattern);
+    string text = argv[2];
+    int occurance = 0;
     buildMatchingMachine(keywords, ' ', '~');
     int currentState = 0;
     for (int i = 0; i < text.size(); ++i) {
@@ -188,12 +202,12 @@ int main(){
         if (out[currentState] == 0) continue; // Nothing new, let's move on to the next character.
         for (int j = 0; j < keywords.size(); ++j) {
             if (out[currentState] & (1 << j)) { // Matched keywords[j]
-                cout << "Keyword " << keywords[j] << " appears from "
-                << i - keywords[j].size() + 1 << " to " << i << endl;
+                occurance++;
             }
         }
     }
     
-    return 0;
+    cout << "pattern found: " << occurance << " times" << endl;
+    return occurance;
     
 }
