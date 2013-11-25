@@ -202,47 +202,34 @@ void SuffixTree::UpdateActivePointAfterEdgeSplitting() {
     CreateSuffixLink(active.node);
 }
 
-int SuffixTree::Match(string pattern) {
+int SuffixTree::Match(string pattern) const {
   // Canonize the pattern
   for (size_t i = 0; i < pattern.size(); ++i)
     pattern[i] -= FIRST_ALPHABET_CHARACTER;
 
   Node* current_node = ROOT;
-  const Edge* current_edge = NULL;
-  size_t edge_ind = 0;
+  Edge* current_edge = NULL;
+  char edge_ind = 0;
   for (size_t i = 0; i < pattern.size(); ++i) {
     if (!current_edge)
-      current_edge = ChooseEdge(pattern[i], *current_node);
-
-    if (!current_edge) {
-      cout << "HERE1" << endl;
-      return -1;
-    } else {
-      if (pattern[i] == the_string[current_edge->from + edge_ind]) {
-        ++edge_ind;
-      } else {
-        cout << "HERE2" << endl;
+      if (current_node->edges[pattern[i]].exists)
+        current_edge = &current_node->edges[pattern[i]];
+      else
         return -1;
-      }
-      if (current_edge->from + edge_ind > current_edge->to) {
-        current_node = current_edge->tail;
-        edge_ind = 0;
-      }
+
+    if (pattern[i] == the_string[current_edge->from + edge_ind])
+      ++edge_ind;
+    else
+      return -1;
+
+    if (current_edge->from + edge_ind > current_edge->to) {
+      current_node = current_edge->tail;
+      current_edge = NULL;
+      edge_ind = 0;
     }
   }
   
   return 0;
-}
-
-const SuffixTree::Edge* SuffixTree::ChooseEdge(char c, const Node& node) {
-  const Edge* edge_p = NULL;
-  for (size_t i = 0; i < node.edges.size(); ++i) {
-    if (the_string[node.edges[i].from] == c) {
-      edge_p = &node.edges[i];
-      break;
-    }
-  }
-  return edge_p;
 }
 
 }  // namespace suffixtree

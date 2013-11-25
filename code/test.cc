@@ -6,7 +6,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "suffix_tree.h"
+#include "suffixtree/suffix_tree.h"
 
 using std::cout;
 using std::endl;
@@ -17,24 +17,25 @@ typedef bool (*Test) ();  // pointer to a test function
 
 bool test1() {
   string text = "abbabababa";
-  string pattern = "aba";
+  string pattern1 = "aba";
+  string pattern2 = "abbc";
   suffixtree::SuffixTree st(text);
   st.Build();
-  int match = st.Match(pattern);
 
-  return (match >= 0);
+  int match1 = st.Match(pattern1);
+  int match2 = st.Match(pattern2);
+
+  return (match1 >= 0 && match2 < 0);
 }
 
 bool test2() {
   // Dummy function body
-  cout << "Performed test2!" << endl;
   // ...
   return true;
 }
 
 bool test3() {
   // Dummy function body
-  cout << "Performed test3!" << endl;
   // ...
   return true;
 }
