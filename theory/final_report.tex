@@ -253,6 +253,43 @@ Second, traversing the DFA to add the reverse edges involves going forward $k$ t
 \end{enumerate}
 This shows that in the worst case, the number of pattern occurrences in the text, denoted as z, is the dominating factor in the time complexity, yielding $O(n+z)$. In the worst case the term $z$ grows similarly to the sum of running time of applying Naive Search on each pattern in the pattern set, which will be $k\times n$.
 
+\subsection{Experimental Analysis}
+The first experiment was to observe the preprocessing time complexity of O($k$). This was done by fixing the lext length and varying the pattern length expecting to observe linear curve in figure~\ref{fig:pre-fixed-text}. However, the observed curve appears to fluctuate between 0 and 1. The y-axis here is measured against ticks which is 10$us$. This measure is quite sensitive due to the unity. It appears the linear relationship was not observed due to the pattern length being short enough to be processed within 0 or 1 ticks. The longest length of pattern was the length of 100 characters. This shows that most of the patterns are preprocessed within 1 tick.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/pre-DNA-fixed-text.png}
+\caption{Preprocessing time complexity for DNA sequence with fixed lext length with varying pattern length}
+\label{fig:pre-fixed-text}
+\end{figure}
+
+It is also important to show that the preprocessing does not depend on text length. The Figure~\ref{fig:pre-fixed-pattern} was obtained with fixed pattern length and varying the text length from 1000 to 500000 with step of 5000. The figure again fluctuate between 0 and 1 but there is constant dependency with preprocessing time. Thus the preprocessing does not depend on text length following the theory.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/pre-DNA-fixed-pattern.png}
+\caption{Preprocessing time complexity for DNA sequence with fixed patterns with varying text length}
+\label{fig:pre-fixed-pattern}
+\end{figure}
+
+The search time complexity of O($n + z$) was observed in Figure~\ref{fig:ser-dna-pattern}. The linear relationship between the varying text length and search time is observed. The occurance of the patterns in z was observed by plotting more occuring pattern $ACC$ against less occuring pattern $GGCCAATCT$. It shows that more occuring pattern has higher gradient of the curve resulted from the term $z$. The plot corresponding to infrequent pattern $GGCCAATCT$ has linear curve that does not fluctuate as much as the more occuring patterh $ACC$. This is due to occurance term $z$ is being cancelled out due to very small occurance and linear relationship of O($n$) dominates the curve. Th fluctuation of the more occurancing pattern curve $ACC$ is due to the number of occurrances being different in each input text. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/ser-DNA-fixed-pattern.png}
+\caption{Searching time complexity for DNA sequence with fixed patterns with varying text length}
+\label{fig:ser-dna-pattern}
+\end{figure}
+
+The search time complexity was also observed usign natural language text in figure~\ref{fig:ser-natural-pattern}. Similar relationship to the DNA sequence was observed for more occuring pattern and less occuring pattern.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/ser-Natural-fixed-pattern.png}
+\caption{Searching time complexity for Natual Language text with fixed patterns with varying text length}
+\label{fig:ser-natural-pattern}
+\end{figure}
+
 \newpage
 \section{Suffix-tree Pattern Matching}
 \par As the third part of our comparative study, we consider a pattern matching algorithm that relies on so called \textit{suffix tree} data structure. Suffix tree is a well known data structure which is commonly used in industrial and scientific applications of pattern matching today. Being a concise representation of a text composed over a finite alphabet, suffix tree, or more general suffix automaton, is a common way to compress large amounts of textual information, and it is widely used also in databases. In our study, we will perform tests of suffix tree based pattern matching algorithm, and compare it against the aforementioned Boyer-More and Aho-Corasick algorithms trying to get an insight on when should one chose either of these algorithms.
@@ -396,13 +433,12 @@ As it was shown above, algorithm takes linear time to preprocess the text and bu
 \section{Dataset}
 \par We will apply these algorithms on an available dataset of DNA sequences and natural language text, to find specific sequence motifs in the former, and words and phrases in the latter. With regards to the biological dataset, we selected the DNA sequence of human chromosome 1 in fasta format as a searching test. The DNA alphabet consists of four elements, $\Sigma = \{A,\ C,\ G,\ T\}$, that represent  the four nitrogenous bases. We also chose three different patterns for our experimental measurements. As for the natural language data set, we will search for specific phrases of varying lengths. We will compare the performance in the two data sets to highlight the effect of the size of the alphabet and pattern length. Applying the algorithms on these datasets will show practical results on the analytical complexities that we examined and the difference in performance of the three above mentioned algorithms on the tested domains of application.
 
-
-Both natural language text and DNA input text were formatted as $.txt$ and any special characters were removed.
+Both natural language text and DNA input text were formatted as $.txt$ and ASCII standard characters were used for matching critria.
 
 \section{Experiment}
-\par In order to observe the effect of parameters n and k in runtime complexity, we vary each parameter while other parameters are fixed. This is applied to both the text and the pattern. We first fixed the length of text n and vary the length of pattern k from 1 to 100. Then we fix the length of the pattern k and vary the length of the text to from 1 with increments of 1000 char length. We obtain the time taken for running each algorithm in above conditions and plot the graph showing the effect of n and k.
+\par In order to observe the effect of parameters n and k in runtime complexity, we vary each parameter while other parameters are fixed. This is applied to both the text and the pattern. We first fixed the length of text n and vary the length of pattern k from 1 to 100. Then we fix the length of the pattern k and vary the length of the text to from 1000 to 500000 with increments of 5000 char length. We obtain the time taken for running each algorithm in above conditions and plot the graph showing the effect of n and k.
 
-For the DNA dataset, the fixed length text of 500000 was used for the input test. The pattern length was varied from the length of one character (i.e $A$) to the length of 100 characters $TCTGG...TCGAA$. Since Aho Corasick and Suffix Tree has occurrance z as part of their complexity, the occurance of the each different length of patterns in each input is know. This way, the algorithm performance subject to z can be observed. 
+For the DNA dataset, the pattern length was varied from the length of one character (i.e $A$) to the length of 100 characters $TCTGG...TCGAA$. Since Aho Corasick and Suffix Tree has occurrance z as part of their complexity, the patterns with frequent occurance and less frequent occurance was used. This way, the algorithm performance subject to z can be observed. 
 
 \section{Discussion}
 \par Each algorithm has a one time preprocessing cost. Aho-Corasick algorithm has linear search cost to the length of the input text and the occurrences of the patterns in the input text. When the alphabet in $|\Sigma|$ has a single character, the term $z$ in Aho-Corasick grows similarly to the sum of running time of applying Na\"ive Search on each pattern in the pattern set, which will be $k\times n$, resulting in the worst case running time for Aho-Corasick. However, such a small alphabet has a positive effect on Boyer-Moore, resulting in a smaller preprocessing time.
