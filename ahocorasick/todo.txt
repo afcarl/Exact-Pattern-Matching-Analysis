@@ -1,4 +1,0 @@
-Changes done to code:
- * - Changed MAXC from 26 to 90 to include special and
- * upper case characters (and SPACE) in the alphabet
- * - Changed lowestChar from 'a' to ' ' highestChar from 'z' to '~'
