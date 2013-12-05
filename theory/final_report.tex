@@ -187,7 +187,7 @@ In this section we show the time complexity for both the preprocessing and searc
 
 \newpage
 \section{Aho-Corasick algorithm}
-Aho-Corasick algorithm \cite{aho} is a generalization of the Knuth-Morris-Pratt algorithm. It takes one or more patterns (a dictionary) to be searched in the text. Suppose, the total length of all patterns is $k$. Then, the algorithm pre-processes the patterns and constructs a Deterministic Finite Automaton (DFA) \cite{hopcroft} in $O(k)$ time. The obtained DFA processes a text and reports pattern occurrences in linear time too -- $O(n + z)$, where $z$ is the number of occurrences to be found. The $O(z)$ term is for that we assume that we can report all the occurrences in linear time. The example of the DFA is given in the figure \ref{dfa}.
+Aho-Corasick algorithm \cite{aho} is a generalization of the Knuth-Morris-Pratt algorithm. It takes one or more patterns (a dictionary) to be searched in the text, and the total length of all patterns is $k$. Then, the algorithm pre-processes the patterns and constructs a Deterministic Finite Automaton (DFA) \cite{hopcroft} in $O(k)$ time. The obtained DFA resembles a trie with additional links between the various internal nodes which connect nodes to their sufixes, allowing fast transitions between failed pattern matches to other branches of the trie that share a common prefix. For example, a search for rat in a trie that does not contain rat, but contains ram, will fail at the node prefixed by ra, and a branch for attic may be the best lateral transition. The DFA processes a text and reports pattern occurrences in linear time too -- $O(n + z)$, where $z$ is the number of occurrences to be found. The $O(z)$ term is for that we assume that we can report all the occurrences in linear time. The example of the DFA is given in the figure \ref{dfa}.
 
 \begin{figure}[h!]
 \centering
@@ -201,8 +201,8 @@ Aho-Corasick algorithm \cite{aho} is a generalization of the Knuth-Morris-Pratt 
 Each node consists of a character is represents, a flag signifying whether or not it is a dictionary node, and a set of the patterns it represents. A dictionary node is a special kind of node which marks the end of a pattern or more, and those patterns are stored in the set of patterns it represents.
 
 \begin{enumerate}
-\item Forward Edge: Connecting a node representing character at position $i$ in pattern $p$ to the one representing the character at position $i+1$ in the same pattern.
-\item Reverse Edge: Connecting a node to another node representing the same value in a higher level (closer to the $root$) provided they have the same value parents, which is insured during the building.
+\item Child Edge: Connecting a node representing character at position $i$ in pattern $p$ to the ones representing the character at position $i+1$ in the same patterns.
+\item Reverse Edge: Connecting a node A to another node B representing the suffix of A, (B is closer to the $root$) provided they have the same value parents, which is insured during the building.
 \end{enumerate}
 
 \subsubsection{Setting Up the Nodes and Forward Edges}
