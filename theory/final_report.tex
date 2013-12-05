@@ -270,7 +270,7 @@ Each character in the input text must be compared to the content of a node once,
 This shows that in the worst case, the number of pattern occurrences in the text, denoted as z, is the dominating factor in the time complexity, yielding $O(n+z)$. In the worst case the term $z$ grows similarly to the sum of running time of applying Naive Search on each pattern in the pattern set, which will be $k\times n$.
 
 \subsection{Experimental Analysis}
-The first experiment was to observe the preprocessing time complexity of O($k$). This was done by fixing the text length and varying the pattern length expecting to observe linear curve in figure~\ref{fig:pre-fixed-text}. However, the observed curve appears to fluctuate between 0 and 1. The y-axis here is measured against ticks which is 10$us$. This measure is quite sensitive due to the unity. It appears the linear relationship was not observed due to the pattern length being short enough to be processed within 0 or 1 ticks. The longest length of pattern was the length of 100 characters. This shows that most of the patterns are preprocessed within 1 tick.
+The first experiment was to observe the preprocessing time complexity of O($k$). This was done by fixing the text length and varying the pattern length expecting to observe linear curve in figure~\ref{fig:pre-fixed-text}. The observed curve shows the linear relationship and appears to fluctuate between 0 and 1. The y-axis here is measured against ticks which is 10$ms$. This measure is quite sensitive due to the unity. The longest length of pattern was the length of 100 characters.
 
 \begin{figure}[h!]
 \centering
