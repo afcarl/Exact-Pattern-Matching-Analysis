@@ -1,42 +1,56 @@
 /******************************************************************************
- * Test for pattern matching algorithms
- *
+ * Tests for pattern matching algorithms
  * Copyright 2013, Maruan Al-Shedivat
  ******************************************************************************/
 #include <iostream>
 #include <string>
 #include <vector>
-#include "suffix_tree.h"
+#include "suffixtree/suffix_tree.h"
 
 using std::cout;
 using std::endl;
 using std::string;
 
 const int kTestNum = 3;   // Number of tests to perform
-typedef bool (*Test) ();  // pointer to a test function
+typedef bool (*Test) ();  // Pointer to a test function
 
 bool test1() {
   string text = "abbabababa";
-  string pattern = "aba";
+  string pattern1 = "aba";
+  string pattern2 = "abbc";
   suffixtree::SuffixTree st(text);
   st.Build();
-  int match = st.Match(pattern);
 
-  return (match >= 0);
+  int match1 = st.Match(pattern1);
+  int match2 = st.Match(pattern2);
+
+  return (match1 == 3 && match2 < 0);
 }
 
 bool test2() {
-  // Dummy function body
-  cout << "Performed test2!" << endl;
-  // ...
-  return true;
+  string text = "abcabxabcd";
+  string pattern1 = "cd";
+  string pattern2 = "cdx";
+  suffixtree::SuffixTree st(text);
+  st.Build();
+
+  int match1 = st.Match(pattern1);
+  int match2 = st.Match(pattern2);
+
+  return (match1 == 8 && match2 < 0);
 }
 
 bool test3() {
-  // Dummy function body
-  cout << "Performed test3!" << endl;
-  // ...
-  return true;
+  string text = "abcdefabxybcdmnabcdex";
+  string pattern1 = "cd";
+  string pattern2 = "cdx";
+  suffixtree::SuffixTree st(text);
+  st.Build();
+
+  int match1 = st.Match(pattern1);
+  int match2 = st.Match(pattern2);
+
+  return (match1 == 2 && match2 < 0);
 }
 
 int main() {

@@ -22,12 +22,12 @@ class SuffixTree {
 
   void Build();
 
-  int Match(string pattern);
+  int Match(string pattern) const;
 
  private:
-  static const size_t ALPHABET_SIZE = 26;   // we use latin lowercase alphabet
-  static const char FIRST_ALPHABET_CHARACTER = 'a';
-  static const char SENTINEL_SIGN = static_cast<char>(ALPHABET_SIZE);
+  static const size_t ALPHABET_SIZE = 94;   // we use all symbols from ' ' to '~'
+  static const char FIRST_ALPHABET_CHARACTER = ' ';
+  static const char SENTINEL_SIGN = static_cast<char>(27);
 
   struct Node;
   struct Edge;
@@ -104,8 +104,6 @@ class SuffixTree {
   bool NormalizeActivePoint();
   void UpdateActivePointAfterEdgeSplitting();
   void CreateSuffixLink(Node* node);
-
-  const Edge* ChooseEdge(char c, const Node& node);
 };
 
 }  // namespace suffixtree

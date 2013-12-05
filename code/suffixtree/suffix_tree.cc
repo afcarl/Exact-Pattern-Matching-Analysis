@@ -1,6 +1,5 @@
 /******************************************************************************
  * Suffix tree implementation
- *
  * Copyright 2013, Maruan Al-Shedivat
  ******************************************************************************/
 #include <iostream>
@@ -30,7 +29,7 @@ namespace suffixtree {
  * RULE 2. If we split an edge and insert a new node, and if that is not the
  * first node created during the current step, we connect the previously
  * inserted node and the new node through a special pointer, a suffix link.
- * Also, if we change the active node during 'active node normalizatio process'
+ * Also, if we change the active node during 'active node normalization process'
  * we should create an active link from the last created node to newly updated
  * active node.
  *
@@ -41,8 +40,8 @@ namespace suffixtree {
  * unchanged.
  *
  * NOTE: This nice notation was generally taken from the best answer to the
- *       question http://stackoverflow.com/questions/9452701/ and then some
- *       mistakes were corrected.
+ *       question http://stackoverflow.com/questions/9452701/, and then a few
+ *       bugs and logic mistakes were fixed up.
  ******************************************************************************/
 // Just replace all the characters with their number in the alphabet
 // and add '$' to the end of the string
@@ -86,7 +85,7 @@ void SuffixTree::Build() {
           AddSuffixImplicitly();
           break;
         }
-      } else {  // if active position is implicit
+      } else {  // if the active position is implicit
         if (the_string[current_suffix_end_index] ==
             the_string[active.edge->from + active.length]) {
           // if the active point was implicit and next characters coincided
@@ -202,47 +201,40 @@ void SuffixTree::UpdateActivePointAfterEdgeSplitting() {
     CreateSuffixLink(active.node);
 }
 
-int SuffixTree::Match(string pattern) {
+int SuffixTree::Match(string pattern) const {
   // Canonize the pattern
   for (size_t i = 0; i < pattern.size(); ++i)
     pattern[i] -= FIRST_ALPHABET_CHARACTER;
 
   Node* current_node = ROOT;
-  const Edge* current_edge = NULL;
-  size_t edge_ind = 0;
+  Edge* current_edge = NULL;
+  char edge_ind = 0;
+  int pos_in_string = 0;
   for (size_t i = 0; i < pattern.size(); ++i) {
+    // if we were in an explicit node
     if (!current_edge)
-      current_edge = ChooseEdge(pattern[i], *current_node);
-
-    if (!current_edge) {
-      cout << "HERE1" << endl;
-      return -1;
-    } else {
-      if (pattern[i] == the_string[current_edge->from + edge_ind]) {
-        ++edge_ind;
-      } else {
-        cout << "HERE2" << endl;
+      if (current_node->edges[pattern[i]].exists)
+        current_edge = &current_node->edges[pattern[i]];
+      else
         return -1;
-      }
-      if (current_edge->from + edge_ind > current_edge->to) {
-        current_node = current_edge->tail;
-        edge_ind = 0;
-      }
+
+    // if we are in an implicit node
+    if (pattern[i] == the_string[current_edge->from + edge_ind])
+      ++edge_ind;
+    else
+      return -1;
+
+    pos_in_string = current_edge->from + edge_ind;
+
+    // check if we reached the next explicit node
+    if (current_edge->from + edge_ind > current_edge->to) {
+      current_node = current_edge->tail;
+      current_edge = NULL;
+      edge_ind = 0;
     }
   }
   
-  return 0;
-}
-
-const SuffixTree::Edge* SuffixTree::ChooseEdge(char c, const Node& node) {
-  const Edge* edge_p = NULL;
-  for (size_t i = 0; i < node.edges.size(); ++i) {
-    if (the_string[node.edges[i].from] == c) {
-      edge_p = &node.edges[i];
-      break;
-    }
-  }
-  return edge_p;
+  return pos_in_string - pattern.size();
 }
 
 }  // namespace suffixtree
