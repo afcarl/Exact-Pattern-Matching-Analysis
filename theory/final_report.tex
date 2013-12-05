@@ -185,6 +185,36 @@ return "There is no substring of T matching P."
 \subsection{Complexity}
 In this section we show the time complexity for both the preprocessing and searching phases of the algorithm. For the preprocessing stage, a table of $k\times|\Sigma|$ is stored in memory, so the space complexity is $O(k\times|\Sigma|)$. Initially, the first row is initialized to zeros. At each step, one value is updated in the table and the rest of the values are copied from the row before it. So at each step, $i<k$, $|\Sigma|$ operations are done. Thus, the preprocessing time complexity is $O(k\times|\Sigma|)$. For the searching phase, the text $T$ is compared to pattern $P$ from right to left. The worst time occurs when the shifts are only one character at a time and the algorithm would be similar to naive search with a complexity of $O(k\times n)$. However, the shifts employed by this algorithm allow it to have a sublinear complexity especially in the case of large alphabet and random strings.
 
+\subsection{Experimental Analysis}
+In order to verify the theoretical analysis, we generated some experimental results. The plot in figure \ref{bmpreprocess} shows that the preprocessing time of Boyer Moore increases linearly to the pattern length. This is in complete agreement with the theoretical preprocessing complexity of the algorithm, since the time required to construct the table is proportional to the length of the pattern O(k*|Σ|).
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/bm-preprocess.png}
+\caption{Preprocessing time of Boyre Moore as the pattern length increases}
+\label{bmpreprocess}
+\end{figure}
+
+
+Figure \ref{bmtext} shows the behavior of our algorithm for two different patterns, one that occurs frequently and one that does not occur, as the text length increases. As expected Boyre Moore algorithm illustrates better behavior when the pattern does not occur in the text length, since the length of the shifts that are performed in the text is larger. Indeed in some cases that the pattern does not exist in the text, the algorithm presents sub linear complexity.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=1\textwidth]{figures/bm-search.png}
+\caption{Searching time of Boyre Moore as the text length increases}
+\label{bmtext}
+\end{figure}
+
+Finally, we study the behavior of Boyre Moore algorithm for a fixed size text, as the pattern length gradually increases. The second plot in figure \ref{bmpattern} that regards the natural text, the searching time continually decreases as the pattern length increases. This is normal and expected, since the longer patterns do not appear in the text, and therefore the algorithm is able to perform larger shifts on the text. However this does not happen with DNA sequence, where a worse behavior is illustrated, verifying that Boyer Moore does not perform well in small length alphabets.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=1\textwidth]{figures/bm-search2.png}
+\caption{Searching time of Boyre Moore as the pattern length increases}
+\label{bmpattern}
+\end{figure}
+
 \newpage
 \section{Aho-Corasick algorithm}
 Aho-Corasick algorithm \cite{aho} is a generalization of the Knuth-Morris-Pratt algorithm. It takes one or more patterns (a dictionary) to be searched in the text, and the total length of all patterns is $k$. Then, the algorithm pre-processes the patterns and constructs a Deterministic Finite Automaton (DFA) \cite{hopcroft} in $O(k)$ time. The obtained DFA resembles a trie with additional links between the various internal nodes which connect nodes to their sufixes, allowing fast transitions between failed pattern matches to other branches of the trie that share a common prefix. For example, a search for rat in a trie that does not contain rat, but contains ram, will fail at the node prefixed by ra, and a branch for attic may be the best lateral transition. The DFA processes a text and reports pattern occurrences in linear time too -- $O(n + z)$, where $z$ is the number of occurrences to be found, which we assume we can report in linear time. The example of the DFA is given in the figure \ref{dfa}.
